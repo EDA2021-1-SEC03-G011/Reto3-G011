@@ -50,6 +50,7 @@ def printMenu():
     print("Bienvenido")
     print("1- Inicializar el catalogo")
     print("2- Cargar información en el catálogo")
+    print("3- Caracterizar las reproducciones")
     print("/-/-/-/-/-/-/-/-/-/-/-/-/-/-/")
 
 catalog = None
