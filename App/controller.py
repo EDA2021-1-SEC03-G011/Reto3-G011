@@ -28,11 +28,35 @@ import csv
 """
 El controlador se encarga de mediar entre la vista y el modelo.
 """
+# ======================================
+# Inicialización del Catálogo
+# ======================================
 
-# Inicialización del Catálogo de libros
+def init():
+    catalog = model.newCatalog()
+    return catalog
 
+# =================================
 # Funciones para la carga de datos
+# =================================
+
+def loadData(catalog, musicfile):
+    musicfile = cf.data_dir + musicfile
+    input_file = csv.DictReader(open(musicfile, encoding = 'utf-8'), delimiter=",") 
+    for song in input_file:
+        model.addSong(catalog, song)
+
+    return catalog
 
 # Funciones de ordenamiento
 
 # Funciones de consulta sobre el catálogo
+
+def songsSize(catalog):
+    return model.songsSize(catalog)
+
+def artistsSize(catalog):
+    return model.artistsSize(catalog)
+
+def uniqueSongsSize(catalog):
+    return model.uniqueSongsSize(catalog)
