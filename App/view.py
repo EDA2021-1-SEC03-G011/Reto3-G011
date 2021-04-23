@@ -72,6 +72,19 @@ while True:
         print("Total de artistas unicos cargados: "+str(controller.artistsSize(catalog)))
         print("Total de pistas de audio unicas cargadas: "+str(controller.uniqueSongsSize(catalog)))
 
+    elif int(inputs[0]) == 3:
+        characteristic = input("Bajo que caracteristica desea buscar: ")
+        loValue = float(input("Digite el valor minimo de la caracteristica del contenido: "))
+        hiValue = float(input("Digite el valor maximo de la caracteristica del contenido: "))
+        charMap = controller.createCharMap(catalog, characteristic)
+        charList = controller.createCharList(charMap,loValue,hiValue)
+        uniqueSongs = controller.uniqueSongsChar(charList)
+        uniqueArtistsMap = controller.createArtistsCharMap(charList)
+        artistsMapSize = controller.mapSize(uniqueArtistsMap)
+        print("\n+++++++ Resultados Req No. 1 +++++++")
+        print(characteristic + "entre " + str(loValue)+" - "+str(hiValue))
+        print("Reproducciones totales: "+str(uniqueSongs)+" Artistas unicos: "+str(artistsMapSize))
+
     else:
         sys.exit(0)
 sys.exit(0)
