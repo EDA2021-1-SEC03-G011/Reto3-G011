@@ -52,6 +52,7 @@ def printMenu():
     print("2- Cargar información en el catálogo")
     print("3- Caracterizar las reproducciones")
     print("5- Encontrar musica para estudiar")
+    print("5- Estudiar los generos musicales")
     print("/-/-/-/-/-/-/-/-/-/-/-/-/-/-/")
 
 catalog = None
@@ -95,6 +96,9 @@ while True:
         tempoList = controller.createTempoList(tempoMap, loTempo, hiTempo)
         instruList = controller.createInstruList(tempoList,loInstru,hiInstru)
         controller.printReqThree(instruList,loInstru,hiInstru,loTempo,hiTempo)
+
+    elif int(inputs[0]) == 6:
+        pass
 
     else:
         sys.exit(0)
