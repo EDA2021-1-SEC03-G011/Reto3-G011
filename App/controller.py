@@ -50,6 +50,19 @@ def loadData(catalog, musicfile):
 
 # Funciones de ordenamiento
 
+# ================================
+# Funciones para creacion de datos
+# ================================
+
+def createCharMap(catalog, characteristic):
+    return model.createCharMap(catalog, characteristic)
+
+def createCharList(charMap,loValue,hiValue):
+    return model.createCharList(charMap,loValue,hiValue)
+
+def createArtistsCharMap(charList):
+    return model.createArtistsCharMap(charList)
+
 # Funciones de consulta sobre el catálogo
 
 def songsSize(catalog):
@@ -60,3 +73,9 @@ def artistsSize(catalog):
 
 def uniqueSongsSize(catalog):
     return model.uniqueSongsSize(catalog)
+
+def uniqueSongsChar(charList):
+    return model.uniqueSongsChar(charList)
+
+def mapSize(map):
+    return model.mapSize(map)

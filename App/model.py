@@ -31,6 +31,7 @@ from DISClib.ADT import map as m
 from DISClib.ADT import orderedmap as om
 from DISClib.DataStructures import mapentry as me
 from DISClib.Algorithms.Sorting import shellsort as sa
+from DISClib.DataStructures import linkedlistiterator as slit
 assert cf
 
 """
@@ -42,14 +43,17 @@ los mismos.
 # ======================
 def newCatalog():
     catalog = {'songs':None,
+            'songsUnique':None,
             'artistsUnique':None,
             'songsUnique':None}
 
     catalog['songs'] = lt.newList(datastructure='SINGLE_LINKED')
 
+    catalog['songsListUnique'] = lt.newList(datastructure='SINGLE_LINKED')
+
     catalog['artistsUnique'] = om.newMap(omaptype='BST')
 
-    catalog['songsUnique'] = om.newMap(omaptype='BST')
+    catalog['songsMapUnique'] = om.newMap(omaptype='BST')
 
     return catalog
 
@@ -58,7 +62,7 @@ def newCatalog():
 def addSong(catalog, song):
     lt.addLast(catalog['songs'],song)
     updateArtistsUnique(catalog['artistsUnique'],song)
-    updateSongsUnique(catalog['songsUnique'],song)
+    updateSongsUnique(catalog['songsMapUnique'],song,catalog['songsListUnique'])
 
 def updateArtistsUnique(map, song):
     artist = song['artist_id']
@@ -73,7 +77,7 @@ def updateArtistsUnique(map, song):
         existingList = me.getValue(exists)
         lt.addLast(existingList,song)
 
-def updateSongsUnique(map, song):
+def updateSongsUnique(map, song,uniqueList):
     track = song['track_id']
     exists = om.get(map, track)
 
@@ -81,13 +85,76 @@ def updateSongsUnique(map, song):
         list = lt.newList(datastructure="SINGLE_LINKED")
         lt.addLast(list, song)
         om.put(map,track,list)
+        lt.addLast(uniqueList, song)
 
     else:
         existingList = me.getValue(exists)
         lt.addLast(existingList,song)
 
-
+# ================================
 # Funciones para creacion de datos
+# ================================
+
+def createCharMap(catalog, characteristic):
+    uniqueList = catalog['songs']
+    charMap = om.newMap(omaptype='RBT')
+
+    iterator = slit.newIterator(uniqueList)
+
+    while slit.hasNext(iterator):
+        song = slit.next(iterator)
+        existingValue = om.get(charMap, float(song[characteristic]))
+
+        if existingValue is None: 
+            listInKey = lt.newList(datastructure='SINGLE_LINKED')
+            lt.addLast(listInKey, song)
+            om.put(charMap,float(song[characteristic]),listInKey)
+        
+        else:
+            listInKey = (me.getValue(existingValue))
+            lt.addLast(listInKey, song)
+
+    return charMap
+
+def createCharList(charMap,loValue,hiValue):
+    listOfLists = om.values(charMap,loValue,hiValue)
+    charList = lt.newList(datastructure='SINGLE_LINKED')
+
+    iteratorLists = slit.newIterator(listOfLists)
+
+    while slit.hasNext(iteratorLists):
+        list = slit.next(iteratorLists)
+
+        iteratorSongs = slit.newIterator(list)
+
+        while slit.hasNext(iteratorSongs):
+            song = slit.next(iteratorSongs)
+            lt.addLast(charList,song)
+    
+    return charList
+
+def createArtistsCharMap(charList):
+    map = om.newMap(omaptype='BST')
+
+    iterator = slit.newIterator(charList)
+
+    while slit.hasNext(iterator):
+        song = slit.next(iterator)
+        artist = song['artist_id']
+        exists = om.get(map,artist)
+
+        if exists is None:
+            list = lt.newList(datastructure="SINGLE_LINKED")
+            lt.addLast(list, song)
+            om.put(map,artist,list)
+
+        else:
+            existingList = me.getValue(exists)
+            lt.addLast(existingList,song)
+
+    return map
+
+
 
 # Funciones de consulta
 
@@ -98,7 +165,13 @@ def artistsSize(catalog):
     return om.size(catalog['artistsUnique'])
 
 def uniqueSongsSize(catalog):
-    return om.size(catalog['songsUnique'])
+    return om.size(catalog['songsMapUnique'])
+
+def uniqueSongsChar(charList):
+    return lt.size(charList)
+
+def mapSize(map):
+    return om.size(map)
 
 # Funciones utilizadas para comparar elementos dentro de una lista
 

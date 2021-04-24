@@ -50,6 +50,7 @@ def printMenu():
     print("Bienvenido")
     print("1- Inicializar el catalogo")
     print("2- Cargar información en el catálogo")
+    print("3- Caracterizar las reproducciones")
     print("/-/-/-/-/-/-/-/-/-/-/-/-/-/-/")
 
 catalog = None
@@ -70,6 +71,19 @@ while True:
         print("Total de registros de eventos cargados: "+str(controller.songsSize(catalog)))
         print("Total de artistas unicos cargados: "+str(controller.artistsSize(catalog)))
         print("Total de pistas de audio unicas cargadas: "+str(controller.uniqueSongsSize(catalog)))
+
+    elif int(inputs[0]) == 3:
+        characteristic = input("Bajo que caracteristica desea buscar: ")
+        loValue = float(input("Digite el valor minimo de la caracteristica del contenido: "))
+        hiValue = float(input("Digite el valor maximo de la caracteristica del contenido: "))
+        charMap = controller.createCharMap(catalog, characteristic)
+        charList = controller.createCharList(charMap,loValue,hiValue)
+        uniqueSongs = controller.uniqueSongsChar(charList)
+        uniqueArtistsMap = controller.createArtistsCharMap(charList)
+        artistsMapSize = controller.mapSize(uniqueArtistsMap)
+        print("\n+++++++ Resultados Req No. 1 +++++++")
+        print(characteristic + "entre " + str(loValue)+" - "+str(hiValue))
+        print("Reproducciones totales: "+str(uniqueSongs)+" Artistas unicos: "+str(artistsMapSize))
 
     else:
         sys.exit(0)
