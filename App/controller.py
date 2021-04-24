@@ -63,6 +63,15 @@ def createCharList(charMap,loValue,hiValue):
 def createArtistsCharMap(charList):
     return model.createArtistsCharMap(charList)
 
+def createTempoMap(catalog):
+    return model.createTempoMap(catalog)
+
+def createTempoList(tempoMap, loTempo, hiTempo):
+    return model.createTempoList(tempoMap, loTempo, hiTempo)
+
+def createInstruList(tempoList,loInstru,hiInstru):
+    return model.createInstruList(tempoList,loInstru,hiInstru)
+
 # Funciones de consulta sobre el catálogo
 
 def songsSize(catalog):
@@ -79,3 +88,10 @@ def uniqueSongsChar(charList):
 
 def mapSize(map):
     return model.mapSize(map)
+
+# =======================
+# Funciones para imprimir
+# =======================
+
+def printReqThree(list,loInstru,hiInstru,loTempo,hiTempo):
+    model.printReqThree(list,loInstru,hiInstru,loTempo,hiTempo)

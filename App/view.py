@@ -87,7 +87,14 @@ while True:
         print("Reproducciones totales: "+str(uniqueSongs)+" Artistas unicos: "+str(artistsMapSize))
 
     elif int(inputs[0]) == 5:
-        pass
+        loInstru = float(input("Digite el valor minimo para la instrumentalidad: "))
+        hiInstru = float(input("Digite el valor maximo para la instrumentalidad: "))
+        loTempo = float(input("Digite el valor minimo para el tempo: "))
+        hiTempo = float(input("Digite el valor maximo para el tempo: "))
+        tempoMap = controller.createTempoMap(catalog)
+        tempoList = controller.createTempoList(tempoMap, loTempo, hiTempo)
+        instruList = controller.createInstruList(tempoList,loInstru,hiInstru)
+        controller.printReqThree(instruList,loInstru,hiInstru,loTempo,hiTempo)
 
     else:
         sys.exit(0)

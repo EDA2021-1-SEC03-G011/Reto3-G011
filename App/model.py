@@ -24,7 +24,7 @@
  * Dario Correal - Version inicial
  """
 
-
+import random
 import config as cf
 from DISClib.ADT import list as lt
 from DISClib.ADT import map as m
@@ -41,6 +41,7 @@ los mismos.
 # ======================
 # Creacion del catalogo
 # ======================
+
 def newCatalog():
     catalog = {'songs':None,
             'songsUnique':None,
@@ -57,7 +58,9 @@ def newCatalog():
 
     return catalog
 
+# ==============================================
 # Funciones para agregar informacion al catalogo
+# ==============================================
 
 def addSong(catalog, song):
     lt.addLast(catalog['songs'],song)
@@ -154,9 +157,58 @@ def createArtistsCharMap(charList):
 
     return map
 
+def createTempoMap(catalog):
+    tempoMap = om.newMap(omaptype='RBT')
+    songsList = catalog['songsListUnique']
 
+    iterator = slit.newIterator(songsList)
 
+    while slit.hasNext(iterator):
+        song = slit.next(iterator)
+        exists = om.get(tempoMap, float(song['tempo']))
+
+        if exists is None:
+            listForTempo = lt.newList(datastructure='SINGLE_LINKED')
+            lt.addLast(listForTempo, song)
+            om.put(tempoMap,float(song['tempo']),listForTempo)
+        else:
+            existingList = me.getValue(exists)
+            lt.addLast(existingList,song)
+
+    return tempoMap
+
+def createTempoList(tempoMap, loTempo, hiTempo):
+    listOfLists = om.values(tempoMap, loTempo, hiTempo)
+    tempoList = lt.newList(datastructure='SINGLE_LINKED')
+
+    iteratorLists = slit.newIterator(listOfLists)
+
+    while slit.hasNext(iteratorLists):
+        list = slit.next(iteratorLists)
+
+        iteratorSongs = slit.newIterator(list)
+
+        while slit.hasNext(iteratorSongs):
+            song = slit.next(iteratorSongs)
+            lt.addLast(tempoList,song)
+    
+    return tempoList
+
+def createInstruList(tempoList,loInstru,hiInstru):
+    instruList = lt.newList(datastructure="SINGLE_LINKED")
+
+    iterator = slit.newIterator(tempoList)
+    while slit.hasNext(iterator):
+        song = slit.next(iterator)
+
+        if float(song['instrumentalness'])>= loInstru and float(song['instrumentalness'])<= hiInstru:
+            lt.addLast(instruList, song)
+
+    return instruList
+
+# =====================    
 # Funciones de consulta
+# =====================
 
 def songsSize(catalog):
     return lt.size(catalog['songs'])
@@ -176,3 +228,20 @@ def mapSize(map):
 # Funciones utilizadas para comparar elementos dentro de una lista
 
 # Funciones de ordenamiento
+
+# =======================
+# Funciones para imprimir
+# =======================
+
+def printReqThree(list,loInstru,hiInstru,loTempo,hiTempo):
+    randomList = random.sample(range(1, lt.size(list)), 5)
+    counter = 1
+    print("\n+++++++ Resultados Req No. 1 +++++++")
+    print("Instrumentalidad entre: "+ str(loInstru)+" - "+str(hiInstru))
+    print("Tempo entre: "+ str(loTempo)+" - "+str(hiTempo))
+    print("Total de tracks encontrados: "+str(lt.size(list)))
+    print("")
+    for i in randomList:
+        song = lt.getElement(list, i)
+        print("Track "+str(counter)+": "+ song['track_id']+" con instrumentalness de: "+str(song['instrumentalness'])+" y tempo de: "+str(song['tempo']))
+        counter +=1
