@@ -51,6 +51,7 @@ def printMenu():
     print("1- Inicializar el catalogo")
     print("2- Cargar información en el catálogo")
     print("3- Caracterizar las reproducciones")
+    print("5- Encontrar musica para estudiar")
     print("/-/-/-/-/-/-/-/-/-/-/-/-/-/-/")
 
 catalog = None
@@ -84,6 +85,9 @@ while True:
         print("\n+++++++ Resultados Req No. 1 +++++++")
         print(characteristic + "entre " + str(loValue)+" - "+str(hiValue))
         print("Reproducciones totales: "+str(uniqueSongs)+" Artistas unicos: "+str(artistsMapSize))
+
+    elif int(inputs[0]) == 5:
+        pass
 
     else:
         sys.exit(0)
