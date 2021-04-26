@@ -44,17 +44,21 @@ los mismos.
 
 def newCatalog():
     catalog = {'songs':None,
-            'songsUnique':None,
-            'artistsUnique':None,
-            'songsUnique':None}
+            'eventList':None,
+            'artists':None,
+            'tracks':None}
 
     catalog['songs'] = lt.newList(datastructure='SINGLE_LINKED')
 
-    catalog['songsListUnique'] = lt.newList(datastructure='SINGLE_LINKED')
+    catalog['eventList'] = lt.newList(datastructure='SINGLE_LINKED')
 
-    catalog['artistsUnique'] = om.newMap(omaptype='BST')
+    catalog['trackList'] = lt.newList(datastructure='SINGLE_LINKED')
 
-    catalog['songsMapUnique'] = om.newMap(omaptype='BST')
+    catalog['eventMap'] = om.newMap(omaptype='BST')
+
+    catalog['trackMap'] = om.newMap(omaptype='BST')
+
+    catalog['artistMap'] = om.newMap(omaptype='BST')
 
     return catalog
 
@@ -64,10 +68,11 @@ def newCatalog():
 
 def addSong(catalog, song):
     lt.addLast(catalog['songs'],song)
-    updateArtistsUnique(catalog['artistsUnique'],song)
-    updateSongsUnique(catalog['songsMapUnique'],song,catalog['songsListUnique'])
+    updateArtists(catalog['artistMap'],song)
+    updateEvents(song,catalog['eventList'],catalog['eventMap'])
+    updateTracks(song,catalog['trackList'],catalog['trackMap'])
 
-def updateArtistsUnique(map, song):
+def updateArtists(map, song):
     artist = song['artist_id']
     exists = om.get(map,artist)
 
@@ -80,18 +85,32 @@ def updateArtistsUnique(map, song):
         existingList = me.getValue(exists)
         lt.addLast(existingList,song)
 
-def updateSongsUnique(map, song,uniqueList):
-    track = song['track_id']
-    exists = om.get(map, track)
+def updateEvents(song,eventList,eventMap):
+    event = (song['user_id'],song['track_id'],song['created_at'])
+    exists_event = om.get(eventMap, event)
 
-    if exists is None:
+    if exists_event is None:
         list = lt.newList(datastructure="SINGLE_LINKED")
         lt.addLast(list, song)
-        om.put(map,track,list)
-        lt.addLast(uniqueList, song)
+        om.put(eventMap,event,list)
+        lt.addLast(eventList, song)
 
     else:
-        existingList = me.getValue(exists)
+        existingList = me.getValue(exists_event)
+        lt.addLast(existingList,song)
+
+def updateTracks(song,trackList,trackMap):
+    track = song['track_id']
+    exists_track = om.get(trackMap, track)
+
+    if exists_track is None:
+        list = lt.newList(datastructure="SINGLE_LINKED")
+        lt.addLast(list, song)
+        om.put(trackMap,track,list)
+        lt.addLast(trackList, song)
+
+    else:
+        existingList = me.getValue(exists_track)
         lt.addLast(existingList,song)
 
 # ================================
@@ -99,7 +118,7 @@ def updateSongsUnique(map, song,uniqueList):
 # ================================
 
 def createCharMap(catalog, characteristic):
-    uniqueList = catalog['songs']
+    uniqueList = catalog['eventList']
     charMap = om.newMap(omaptype='RBT')
 
     iterator = slit.newIterator(uniqueList)
@@ -159,7 +178,7 @@ def createArtistsCharMap(charList):
 
 def createTempoMap(catalog):
     tempoMap = om.newMap(omaptype='RBT')
-    songsList = catalog['songsListUnique']
+    songsList = catalog['trackList']
 
     iterator = slit.newIterator(songsList)
 
@@ -210,14 +229,14 @@ def createInstruList(tempoList,loInstru,hiInstru):
 # Funciones de consulta
 # =====================
 
-def songsSize(catalog):
-    return lt.size(catalog['songs'])
+def eventsSize(catalog):
+    return lt.size(catalog['eventList'])
 
 def artistsSize(catalog):
-    return om.size(catalog['artistsUnique'])
+    return om.size(catalog['artistMap'])
 
-def uniqueSongsSize(catalog):
-    return om.size(catalog['songsMapUnique'])
+def tracksSize(catalog):
+    return om.size(catalog['trackMap'])
 
 def uniqueSongsChar(charList):
     return lt.size(charList)

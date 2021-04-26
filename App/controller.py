@@ -74,14 +74,14 @@ def createInstruList(tempoList,loInstru,hiInstru):
 
 # Funciones de consulta sobre el catálogo
 
-def songsSize(catalog):
-    return model.songsSize(catalog)
+def eventsSize(catalog):
+    return model.eventsSize(catalog)
 
 def artistsSize(catalog):
     return model.artistsSize(catalog)
 
-def uniqueSongsSize(catalog):
-    return model.uniqueSongsSize(catalog)
+def tracksSize(catalog):
+    return model.tracksSize(catalog)
 
 def uniqueSongsChar(charList):
     return model.uniqueSongsChar(charList)
