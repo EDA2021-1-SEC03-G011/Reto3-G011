@@ -60,17 +60,20 @@ def createCharMap(catalog, characteristic):
 def createCharList(charMap,loValue,hiValue):
     return model.createCharList(charMap,loValue,hiValue)
 
-def createArtistsCharMap(charList):
-    return model.createArtistsCharMap(charList)
+def createArtistMap(charList):
+    return model.createArtistMap(charList)
 
-def createTempoMap(catalog):
-    return model.createTempoMap(catalog)
+def createTempoMap(catalog,track_event):
+    return model.createTempoMap(catalog,track_event)
 
 def createTempoList(tempoMap, loTempo, hiTempo):
     return model.createTempoList(tempoMap, loTempo, hiTempo)
 
 def createInstruList(tempoList,loInstru,hiInstru):
     return model.createInstruList(tempoList,loInstru,hiInstru)
+
+def createSubList(list, rank):
+    return model.createSubList(list, rank)
 
 # Funciones de consulta sobre el catálogo
 
@@ -89,9 +92,19 @@ def uniqueSongsChar(charList):
 def mapSize(map):
     return model.mapSize(map)
 
+# ====================================
+# Funciones creacion datos por usuario
+# ====================================
+
+def askGenre(catalog):
+    return model.askGenre(catalog)
+
 # =======================
 # Funciones para imprimir
 # =======================
 
 def printReqThree(list,loInstru,hiInstru,loTempo,hiTempo):
     model.printReqThree(list,loInstru,hiInstru,loTempo,hiTempo)
+
+def printReqFour(genreResults,totalReproductions):
+    model.printReqFour(genreResults,totalReproductions)

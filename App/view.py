@@ -82,7 +82,7 @@ while True:
         charMap = controller.createCharMap(catalog, characteristic)
         charList = controller.createCharList(charMap,loValue,hiValue)
         uniqueSongs = controller.uniqueSongsChar(charList)
-        uniqueArtistsMap = controller.createArtistsCharMap(charList)
+        uniqueArtistsMap = controller.createArtistMap(charList)
         artistsMapSize = controller.mapSize(uniqueArtistsMap)
         print("\n+++++++ Resultados Req No. 1 +++++++")
         print(characteristic + " entre " + str(loValue)+" - "+str(hiValue))
@@ -94,13 +94,31 @@ while True:
         hiInstru = float(input("Digite el valor maximo para la instrumentalidad: "))
         loTempo = float(input("Digite el valor minimo para el tempo: "))
         hiTempo = float(input("Digite el valor maximo para el tempo: "))
-        tempoMap = controller.createTempoMap(catalog)
+        tempoMap = controller.createTempoMap(catalog, 'trackList')
         tempoList = controller.createTempoList(tempoMap, loTempo, hiTempo)
         instruList = controller.createInstruList(tempoList,loInstru,hiInstru)
         controller.printReqThree(instruList,loInstru,hiInstru,loTempo,hiTempo)
 
     elif int(inputs[0]) == 6:
-        pass
+        #REQ 4
+        genreList = controller.askGenre(catalog)
+        tempoMap = controller.createTempoMap(catalog, 'eventList')
+        totalReproductions = 0
+        genreResults = {}
+        for genre in genreList:
+            loTempo = catalog['genres'][genre][0]
+            hiTempo = catalog['genres'][genre][1]
+            tempoList = controller.createTempoList(tempoMap, loTempo, hiTempo)
+            eventList = controller.createSubList(tempoList, 10)
+            artistsMap = controller.createArtistMap(tempoList)
+            reproductions = lt.size(tempoList)
+            artists = controller.mapSize(artistsMap)
+            totalReproductions += reproductions
+            genreResults[genre]={'tempo':(loTempo,hiTempo),'reproductions':reproductions,'artists':artists, 'list':eventList}
+
+        controller.printReqFour(genreResults,totalReproductions)
+            
+            
 
     else:
         sys.exit(0)
