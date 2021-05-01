@@ -61,7 +61,7 @@ def newCatalog():
 
     #catalog['artistMap'] = om.newMap(omaptype='BST')
 
-    #catalog['tempoMap'] = om.newMap(omaptype='RBT')
+    catalog['tempoMap'] = om.newMap(omaptype='RBT')
 
     catalog['genres'] = {'reggae':(60,90),'down-tempo':(70,100),'chill-out':(90,120),'hip-hop':(85,115),
                          'jazz and funk':(120,125),'pop':(100,130),"r&b":(60,80),'rock':(110,140),'metal':(100,160)}
@@ -100,6 +100,16 @@ def eventInTrackMap(catalog, event):
 
     if om.contains(catalog['trackMap'],id_event):
         om.put(catalog['eventMap'],id_event,event)
+
+        if om.contains(catalog['tempoMap'],float(event['tempo'])):
+            couple = om.get(catalog['tempoMap'],float(event['tempo']))
+            list = me.getValue(couple)
+            lt.addLast(list,event)
+
+        else:
+            list = lt.newList(datastructure='SINGLE_LINKED')
+            lt.addLast(list,event)
+        om.put(catalog['tempoMap'],float(event['tempo']),list)
         
 
 def updateTracks(song,trackList,trackMap):
@@ -158,27 +168,17 @@ def createCharList(charMap,loValue,hiValue):
             lt.addLast(charList,song)
     
     return charList
+"""
+def createArtistMap(tempoList):
+    map = mp.newMap(maptype='PROBING')
 
-def createArtistMap(charList):
-    map = om.newMap(omaptype='BST')
-
-    iterator = slit.newIterator(charList)
-
+    iterator = slit.newIterator(tempoList)
     while slit.hasNext(iterator):
-        song = slit.next(iterator)
-        artist = song['artist_id']
-        exists = om.get(map,artist)
-
-        if exists is None:
-            list = lt.newList(datastructure="SINGLE_LINKED")
-            lt.addLast(list, song)
-            om.put(map,artist,list)
-
-        else:
-            existingList = me.getValue(exists)
-            lt.addLast(existingList,song)
-
-    return map
+        event = slit.next(iterator)
+        
+        artist = event['artist_id']
+        mp.put(map,artist,event)
+    return mp.size(map)
 
 def createTempoMap(catalog, track_event):
     tempoMap = om.newMap(omaptype='RBT')
@@ -202,21 +202,20 @@ def createTempoMap(catalog, track_event):
 
 def createTempoList(tempoMap, loTempo, hiTempo):
     listOfLists = om.values(tempoMap, loTempo, hiTempo)
-    tempoList = lt.newList(datastructure='SINGLE_LINKED')
+    answerMap = mp.newMap(maptype='CHAINING',loadfactor=1.0,numelements=28000)
 
     iteratorLists = slit.newIterator(listOfLists)
-
     while slit.hasNext(iteratorLists):
         list = slit.next(iteratorLists)
 
         iteratorSongs = slit.newIterator(list)
-
         while slit.hasNext(iteratorSongs):
             song = slit.next(iteratorSongs)
-            lt.addLast(tempoList,song)
+            id = song['user_id'],song['track_id'],song['created_at']
+            mp.put(answerMap, id, song)
     
-    return tempoList
-
+    return mp.valueSet(answerMap)
+"""
 def createInstruList(tempoList,loInstru,hiInstru):
     instruList = lt.newList(datastructure="SINGLE_LINKED")
 
@@ -228,11 +227,11 @@ def createInstruList(tempoList,loInstru,hiInstru):
             lt.addLast(instruList, song)
 
     return instruList
-
+"""
 def createSubList(list, rank):
     sublist = lt.subList(list,1,rank)
     return sublist
-"""
+
 
 def filterByChar(catalog, characteristic, loValue,hiValue):
     list = om.valueSet(catalog['eventMap'])

@@ -51,6 +51,8 @@ def loadData(catalog, musicfile,usertrack):
     for event in input_file:
         model.eventInTrackMap(catalog, event)
 
+    
+
     return catalog
 
 # Funciones de ordenamiento
@@ -65,27 +67,29 @@ def createCharMap(catalog, characteristic):
 
 def createCharList(charMap,loValue,hiValue):
     return model.createCharList(charMap,loValue,hiValue)
-
+"""
 def createArtistMap(charList):
     return model.createArtistMap(charList)
-
+"""
 def createTempoMap(catalog,track_event):
     return model.createTempoMap(catalog,track_event)
-
+"""
 def createTempoList(tempoMap, loTempo, hiTempo):
     return model.createTempoList(tempoMap, loTempo, hiTempo)
-
+"""
 def createInstruList(tempoList,loInstru,hiInstru):
     return model.createInstruList(tempoList,loInstru,hiInstru)
-
+"""
 def createSubList(list, rank):
     return model.createSubList(list, rank)
-    """
+
 
 def filterByChar(catalog, characteristic, loValue,hiValue):
     return model.filterByChar(catalog, characteristic, loValue,hiValue)
 
+# ========================================
 # Funciones de consulta sobre el catálogo
+# ========================================
 
 def eventsSize(catalog):
     return model.eventsSize(catalog)

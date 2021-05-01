@@ -53,7 +53,7 @@ def printMenu():
     print("2- Cargar información en el catálogo")
     print("3- Caracterizar las reproducciones")
     print("5- Encontrar musica para estudiar")
-    print("5- Estudiar los generos musicales")
+    print("6- Estudiar los generos musicales")
     print("/-/-/-/-/-/-/-/-/-/-/-/-/-/-/")
 
 catalog = None
@@ -97,7 +97,7 @@ while True:
     elif int(inputs[0]) == 6:
         #REQ 4
         genreList = controller.askGenre(catalog)
-        tempoMap = controller.createTempoMap(catalog, 'eventList')
+        tempoMap = catalog['tempoMap']
         totalReproductions = 0
         genreResults = {}
         for genre in genreList:
@@ -107,9 +107,8 @@ while True:
             eventList = controller.createSubList(tempoList, 10)
             artistsMap = controller.createArtistMap(tempoList)
             reproductions = lt.size(tempoList)
-            artists = controller.mapSize(artistsMap)
             totalReproductions += reproductions
-            genreResults[genre]={'tempo':(loTempo,hiTempo),'reproductions':reproductions,'artists':artists, 'list':eventList}
+            genreResults[genre]={'tempo':(loTempo,hiTempo),'reproductions':reproductions,'artists':artistsMap, 'list':eventList}
 
         controller.printReqFour(genreResults,totalReproductions)
             
