@@ -27,7 +27,7 @@
 import random
 import config as cf
 from DISClib.ADT import list as lt
-from DISClib.ADT import map as m
+from DISClib.ADT import map as mp
 from DISClib.ADT import orderedmap as om
 from DISClib.DataStructures import mapentry as me
 from DISClib.Algorithms.Sorting import shellsort as sa
@@ -43,26 +43,25 @@ los mismos.
 # ======================
 
 def newCatalog():
-    catalog = {'songs':None,
-            'eventList':None,
+    catalog = {'eventList':None,
             'artists':None,
             'tracks':None,
             'tempoMap':None,
             'genres':None}
 
-    catalog['songs'] = lt.newList(datastructure='SINGLE_LINKED')
 
-    catalog['eventList'] = lt.newList(datastructure='SINGLE_LINKED')
 
-    catalog['trackList'] = lt.newList(datastructure='SINGLE_LINKED')
+    #catalog['eventList'] = lt.newList(datastructure='SINGLE_LINKED')
 
-    catalog['eventMap'] = om.newMap(omaptype='BST')
+    #catalog['trackList'] = lt.newList(datastructure='SINGLE_LINKED')
 
     catalog['trackMap'] = om.newMap(omaptype='BST')
 
-    catalog['artistMap'] = om.newMap(omaptype='BST')
+    catalog['eventMap'] = om.newMap(omaptype='BST')
 
-    catalog['tempoMap'] = om.newMap(omaptype='RBT')
+    #catalog['artistMap'] = om.newMap(omaptype='BST')
+
+    #catalog['tempoMap'] = om.newMap(omaptype='RBT')
 
     catalog['genres'] = {'reggae':(60,90),'down-tempo':(70,100),'chill-out':(90,120),'hip-hop':(85,115),
                          'jazz and funk':(120,125),'pop':(100,130),"r&b":(60,80),'rock':(110,140),'metal':(100,160)}
@@ -73,11 +72,10 @@ def newCatalog():
 # Funciones para agregar informacion al catalogo
 # ==============================================
 
-def addSong(catalog, song):
-    lt.addLast(catalog['songs'],song)
-    updateArtists(catalog['artistMap'],song)
-    updateEvents(song,catalog['eventList'],catalog['eventMap'])
-    updateTracks(song,catalog['trackList'],catalog['trackMap'])
+def addUserTrack(catalog, usertrack):
+    #updateArtists(catalog['artistMap'],song)
+    updateUserTrack(usertrack,catalog['trackMap'])
+    #updateTracks(song,catalog['trackList'],catalog['trackMap'])
 
 def updateArtists(map, song):
     artist = song['artist_id']
@@ -92,19 +90,17 @@ def updateArtists(map, song):
         existingList = me.getValue(exists)
         lt.addLast(existingList,song)
 
-def updateEvents(song,eventList,eventMap):
-    event = (song['user_id'],song['track_id'],song['created_at'])
-    exists_event = om.get(eventMap, event)
+def updateUserTrack(usertrack,trackMap):
+    event = (usertrack['user_id'],usertrack['track_id'],usertrack['created_at'])
+    
+    om.put(trackMap,event, usertrack)
 
-    if exists_event is None:
-        list = lt.newList(datastructure="SINGLE_LINKED")
-        lt.addLast(list, song)
-        om.put(eventMap,event,list)
-        lt.addLast(eventList, song)
+def eventInTrackMap(catalog, event):
+    id_event =(event['user_id'],event['track_id'],event['created_at'])
 
-    else:
-        existingList = me.getValue(exists_event)
-        lt.addLast(existingList,song)
+    if om.contains(catalog['trackMap'],id_event):
+        om.put(catalog['eventMap'],id_event,event)
+        
 
 def updateTracks(song,trackList,trackMap):
     track = song['track_id']
@@ -124,6 +120,7 @@ def updateTracks(song,trackList,trackMap):
 # Funciones para creacion de datos
 # ================================
 
+"""
 def createCharMap(catalog, characteristic):
     uniqueList = catalog['eventList']
     charMap = om.newMap(omaptype='RBT')
@@ -235,6 +232,21 @@ def createInstruList(tempoList,loInstru,hiInstru):
 def createSubList(list, rank):
     sublist = lt.subList(list,1,rank)
     return sublist
+"""
+
+def filterByChar(catalog, characteristic, loValue,hiValue):
+    list = om.valueSet(catalog['eventMap'])
+    answerMap = mp.newMap(maptype='PROBNG', numelements=1800)
+    counter = 0
+
+    for event in lt.iterator(list):
+        if float(loValue) <= float(event[characteristic]) <= float(hiValue):
+            counter += 1
+            mp.put(answerMap, event['artist_id'],event)
+    
+    return (counter, mp.size(answerMap))
+
+
 
 # =====================    
 # Funciones de consulta

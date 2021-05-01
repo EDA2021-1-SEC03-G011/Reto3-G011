@@ -38,6 +38,7 @@ operación solicitada
 # ====================
 
 musicfile = 'subsamples-small/context_content_features-small.csv'
+usertrack = 'subsamples-small/user_track_hashtag_timestamp-small.csv'
 catalog = None
 
 # ====================
@@ -69,24 +70,18 @@ while True:
 
     elif int(inputs[0]) == 2:
         print("Cargando información de los archivos ....")
-        controller.loadData(catalog, musicfile)
-        print("Total de registros de eventos cargados: "+str(controller.eventsSize(catalog)))
-        print("Total de artistas unicos cargados: "+str(controller.artistsSize(catalog)))
-        print("Total de pistas de audio unicas cargadas: "+str(controller.tracksSize(catalog)))
+        controller.loadData(catalog, musicfile,usertrack)
+
 
     elif int(inputs[0]) == 3:
         #REQ 1
         characteristic = input("Bajo que caracteristica desea buscar: ")
         loValue = float(input("Digite el valor minimo de la caracteristica del contenido: "))
         hiValue = float(input("Digite el valor maximo de la caracteristica del contenido: "))
-        charMap = controller.createCharMap(catalog, characteristic)
-        charList = controller.createCharList(charMap,loValue,hiValue)
-        uniqueSongs = controller.uniqueSongsChar(charList)
-        uniqueArtistsMap = controller.createArtistMap(charList)
-        artistsMapSize = controller.mapSize(uniqueArtistsMap)
+        answer = controller.filterByChar(catalog, characteristic, loValue,hiValue)
         print("\n+++++++ Resultados Req No. 1 +++++++")
         print(characteristic + " entre " + str(loValue)+" - "+str(hiValue))
-        print("Reproducciones totales: "+str(uniqueSongs)+" Artistas unicos: "+str(artistsMapSize))
+        print("Reproducciones totales: "+str(answer[0])+" Artistas unicos: "+str(answer[1]))
 
     elif int(inputs[0]) == 5:
         #REQ 3

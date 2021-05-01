@@ -40,11 +40,16 @@ def init():
 # Funciones para la carga de datos
 # =================================
 
-def loadData(catalog, musicfile):
-    musicfile = cf.data_dir + musicfile
-    input_file = csv.DictReader(open(musicfile, encoding = 'utf-8'), delimiter=",") 
+def loadData(catalog, musicfile,usertrack):
+    usertrack = cf.data_dir + usertrack
+    input_file = csv.DictReader(open(usertrack, encoding = 'utf-8'), delimiter=",") 
     for song in input_file:
-        model.addSong(catalog, song)
+        model.addUserTrack(catalog, song)
+    
+    context = cf.data_dir + musicfile
+    input_file = csv.DictReader(open(context, encoding = 'utf-8'), delimiter=",") 
+    for event in input_file:
+        model.eventInTrackMap(catalog, event)
 
     return catalog
 
@@ -54,6 +59,7 @@ def loadData(catalog, musicfile):
 # Funciones para creacion de datos
 # ================================
 
+"""
 def createCharMap(catalog, characteristic):
     return model.createCharMap(catalog, characteristic)
 
@@ -74,6 +80,10 @@ def createInstruList(tempoList,loInstru,hiInstru):
 
 def createSubList(list, rank):
     return model.createSubList(list, rank)
+    """
+
+def filterByChar(catalog, characteristic, loValue,hiValue):
+    return model.filterByChar(catalog, characteristic, loValue,hiValue)
 
 # Funciones de consulta sobre el catálogo
 
