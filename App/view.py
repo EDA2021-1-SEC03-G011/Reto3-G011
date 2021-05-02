@@ -39,7 +39,6 @@ operación solicitada
 
 contextfile = 'subsamples-small/context_content_features-small.csv'
 usertrack = 'subsamples-small/user_track_hashtag_timestamp-small.csv'
-catalog = None
 
 # ====================
 # Menu principal
@@ -123,8 +122,6 @@ while True:
 
         controller.printReqFour(genreResults,totalReproductions)
             
-            
-
     else:
         sys.exit(0)
 sys.exit(0)

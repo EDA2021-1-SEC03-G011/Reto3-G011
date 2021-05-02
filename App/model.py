@@ -43,25 +43,20 @@ los mismos.
 # ======================
 
 def newCatalog():
-    catalog = {'eventList':None,
-            'artists':None,
-            'tracks':None,
-            'tempoMap':None,
-            'genres':None}
-
-
-
-    #catalog['eventList'] = lt.newList(datastructure='SINGLE_LINKED')
-
-    #catalog['trackList'] = lt.newList(datastructure='SINGLE_LINKED')
+    catalog = {'user-track-createdMap':None,
+               'eventMap':None,
+               'trackMap':None,
+               'tempoMap':None,
+               'trackTempoMap':None,
+               'genres':None,
+               'characteristics':None
+               }
 
     catalog['user-track-createdMap'] = om.newMap(omaptype='BST')
 
     catalog['eventMap'] = om.newMap(omaptype='BST')
 
     catalog['trackMap'] = om.newMap(omaptype='BST')
-
-    #catalog['artistMap'] = om.newMap(omaptype='BST')
 
     catalog['tempoMap'] = om.newMap(omaptype='RBT')
 
@@ -88,21 +83,6 @@ def addUserTrack(catalog, usertrack):
     event = (usertrack['user_id'],usertrack['track_id'],usertrack['created_at'])
     om.put(userTrackMap,event, usertrack)
 
-
-"""
-def updateArtists(map, song):
-    artist = song['artist_id']
-    exists = om.get(map,artist)
-
-    if exists is None:
-        list = lt.newList(datastructure="SINGLE_LINKED")
-        lt.addLast(list, song)
-        om.put(map,artist,list)
-
-    else:
-        existingList = me.getValue(exists)
-        lt.addLast(existingList,song)
-"""
 
 def eventInUserTrackMap(catalog, event):
     id_event =(event['user_id'],event['track_id'],event['created_at'])
@@ -146,66 +126,11 @@ def eventInUserTrackMap(catalog, event):
                 lt.addLast(list,event)
             om.put(catalog['trackTempoMap'],float(event['tempo']),list)
 
- 
-""""
-def updateTracks(song,trackList,trackMap):
-    track = song['track_id']
-    exists_track = om.get(trackMap, track)
-
-    if exists_track is None:
-        list = lt.newList(datastructure="SINGLE_LINKED")
-        lt.addLast(list, song)
-        om.put(trackMap,track,list)
-        lt.addLast(trackList, song)
-
-    else:
-        existingList = me.getValue(exists_track)
-        lt.addLast(existingList,song)
-"""
 
 # ================================
 # Funciones para creacion de datos
 # ================================
 
-"""
-def createCharMap(catalog, characteristic):
-    uniqueList = catalog['eventList']
-    charMap = om.newMap(omaptype='RBT')
-
-    iterator = slit.newIterator(uniqueList)
-
-    while slit.hasNext(iterator):
-        song = slit.next(iterator)
-        existingValue = om.get(charMap, float(song[characteristic]))
-
-        if existingValue is None: 
-            listInKey = lt.newList(datastructure='SINGLE_LINKED')
-            lt.addLast(listInKey, song)
-            om.put(charMap,float(song[characteristic]),listInKey)
-        
-        else:
-            listInKey = (me.getValue(existingValue))
-            lt.addLast(listInKey, song)
-
-    return charMap
-
-def createCharList(charMap,loValue,hiValue):
-    listOfLists = om.values(charMap,loValue,hiValue)
-    charList = lt.newList(datastructure='SINGLE_LINKED')
-
-    iteratorLists = slit.newIterator(listOfLists)
-
-    while slit.hasNext(iteratorLists):
-        list = slit.next(iteratorLists)
-
-        iteratorSongs = slit.newIterator(list)
-
-        while slit.hasNext(iteratorSongs):
-            song = slit.next(iteratorSongs)
-            lt.addLast(charList,song)
-    
-    return charList
-"""
 def createArtistMap(tempoList):
     # FUNCION REQ 4
     map = mp.newMap(maptype='PROBING')
@@ -218,27 +143,7 @@ def createArtistMap(tempoList):
         mp.put(map,artist,event)
     return mp.size(map)
 
-"""
-def createTempoMap(catalog, track_event):
-    tempoMap = om.newMap(omaptype='RBT')
-    songsList = catalog[track_event]
 
-    iterator = slit.newIterator(songsList)
-
-    while slit.hasNext(iterator):
-        song = slit.next(iterator)
-        exists = om.get(tempoMap, float(song['tempo']))
-
-        if exists is None:
-            listForTempo = lt.newList(datastructure='SINGLE_LINKED')
-            lt.addLast(listForTempo, song)
-            om.put(tempoMap,float(song['tempo']),listForTempo)
-        else:
-            existingList = me.getValue(exists)
-            lt.addLast(existingList,song)
-
-    return tempoMap
-"""
 def createTempoList(tempoMap, loTempo, hiTempo):
     # FUNCION REQ 3, REQ 4
     """
@@ -260,6 +165,7 @@ def createTempoList(tempoMap, loTempo, hiTempo):
     
     return mp.valueSet(answerMap)
 
+
 def createInstruList(tempoList,loInstru,hiInstru):
     #FUNCION UNICA REQ 1
     """
@@ -277,6 +183,7 @@ def createInstruList(tempoList,loInstru,hiInstru):
             lt.addLast(instruList, event)
 
     return instruList
+
 
 def createSubList(list, rank):
     # FUNCION REQ 4
@@ -297,7 +204,6 @@ def filterByChar(catalog, characteristic, loValue,hiValue):
             mp.put(answerMap, event['artist_id'],event)
     
     return (counter, mp.size(answerMap))
-
 
 
 # =====================    
@@ -369,6 +275,7 @@ def askGenre(catalog):
     return genreList
 
 def verifyRanges(loRange,hiRange):
+    # FUNCION REQ 1, REQ 3, REQ4
     """
     Verifica que los rangos proporcionados por el usuario sean validos
     """

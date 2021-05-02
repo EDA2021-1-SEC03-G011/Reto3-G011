@@ -59,20 +59,10 @@ def loadData(catalog, contextfile,usertrack):
 # Funciones para creacion de datos
 # ================================
 
-"""
-def createCharMap(catalog, characteristic):
-    return model.createCharMap(catalog, characteristic)
-
-def createCharList(charMap,loValue,hiValue):
-    return model.createCharList(charMap,loValue,hiValue)
-"""
 def createArtistMap(charList):
     # FUNCION REQ 4
     return model.createArtistMap(charList)
-"""
-def createTempoMap(catalog,track_event):
-    return model.createTempoMap(catalog,track_event)
-"""
+
 def createTempoList(tempoMap, loTempo, hiTempo):
     # FUNCION REQ 3, REQ 4
     return model.createTempoList(tempoMap, loTempo, hiTempo)
