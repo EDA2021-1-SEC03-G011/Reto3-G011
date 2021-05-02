@@ -45,8 +45,7 @@ usertrack = 'subsamples-small/user_track_hashtag_timestamp-small.csv'
 # ====================
 
 def printMenu():
-    print("\n")
-    print("/-/-/-/-/-/-/-/-/-/-/-/-/-/-/")
+    print("\n/-/-/-/-/-/-/-/-/-/-/-/-/-/-/")
     print("Bienvenido")
     print("1- Inicializar el catalogo")
     print("2- Cargar información en el catálogo")
@@ -63,13 +62,13 @@ Menu principal
 """
 while True:
     printMenu()
-    inputs = input('Seleccione una opción para continuar: \n')
+    inputs = input('Seleccione una opción para continuar: ')
     if int(inputs[0]) == 1:
         print("Inicializando ....")
         catalog = controller.init()
 
     elif int(inputs[0]) == 2:
-        print("Cargando información de los archivos ....")
+        print("\nCargando información de los archivos ....")
         controller.loadData(catalog, contextfile,usertrack)
 
 
