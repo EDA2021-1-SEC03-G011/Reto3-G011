@@ -60,6 +60,8 @@ def newCatalog():
 
     catalog['tempoMap'] = om.newMap(omaptype='RBT')
 
+    catalog["danceability"]=om.newMap(omaptype='RBT')
+
     catalog['trackTempoMap'] = om.newMap(omaptype='RBT')
 
     catalog['genres'] = {'reggae':(60,90),'down-tempo':(70,100),'chill-out':(90,120),'hip-hop':(85,115),
@@ -87,6 +89,7 @@ def addUserTrack(catalog, usertrack):
 def eventInUserTrackMap(catalog, event):
     id_event =(event['user_id'],event['track_id'],event['created_at'])
     track_id = event['track_id']
+    danceability=float(event['danceability'])
     """
     Para cada evento que se repite en los dos archivos se agrega a un RBT que los
     clasifica por Tempo
@@ -125,6 +128,18 @@ def eventInUserTrackMap(catalog, event):
                 list = lt.newList(datastructure='SINGLE_LINKED')
                 lt.addLast(list,event)
             om.put(catalog['trackTempoMap'],float(event['tempo']),list)
+
+        #Agrega el evento a un RBT segun su danceabilidad
+        
+        if om.contains(catalog["danceability"],danceability):
+            couple=om.get(catalog["danceability"],danceability)
+            map=me.getValue(couple)
+        else:
+            map=mp.newMap(maptype="PROBING",numelements=10)
+
+        mp.put(map,id_event,event)
+        om.put(catalog["danceability"],danceability,map)
+
 
 
 # ================================
@@ -204,6 +219,22 @@ def filterByChar(catalog, characteristic, loValue,hiValue):
             mp.put(answerMap, event['artist_id'],event)
     
     return (counter, mp.size(answerMap))
+
+def filterByFeatures(catalog,lovalueE,hivalueE,lovalueD,hivalueD):
+
+    finalmap=mp.newMap(numelements=2000,maptype='PROBING')
+    listValues=om.values(catalog["danceability"],lovalueD,hivalueD)
+
+    for map in lt.iterator(listValues):
+
+        values=mp.valueSet(map)
+
+        for value in lt.iterator(values):
+            if float(lovalueE)<=float(value["energy"])<=float(hivalueE):
+                mp.put(finalmap,value["track_id"],value)
+    return mp.valueSet(finalmap)
+
+
 
 
 # =====================    
@@ -288,6 +319,23 @@ def verifyRanges(loRange,hiRange):
 # =======================
 # Funciones para imprimir
 # =======================
+
+
+def printReqTwo(answer):
+    #FUNCIÓN REQ2
+    size=lt.size(answer)
+    contador=10
+    if size<contador:
+        contador=size
+
+    print("Total de tracks unicos : ",size)
+    
+    i=1
+    while i<10:
+        event=lt.getElement(answer,i)
+        print("Track",i,":  ",event["track_id"], " with energy of ", event["energy"] ," and danceability of ", event["danceability"] )
+        i+=1
+    
 
 def printReqThree(list,loInstru,hiInstru,loTempo,hiTempo):
     # FUNCION UNICA REQ 3

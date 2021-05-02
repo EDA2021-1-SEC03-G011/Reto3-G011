@@ -50,6 +50,7 @@ def printMenu():
     print("1- Inicializar el catalogo")
     print("2- Cargar información en el catálogo")
     print("3- Caracterizar las reproducciones")
+    print("4-Encontrar musica para festejar")
     print("5- Encontrar musica para estudiar")
     print("6- Estudiar los generos musicales")
     print("/-/-/-/-/-/-/-/-/-/-/-/-/-/-/\n")
@@ -69,7 +70,10 @@ while True:
 
     elif int(inputs[0]) == 2:
         print("\nCargando información de los archivos ....")
-        controller.loadData(catalog, contextfile,usertrack)
+        resources=controller.loadData(catalog, contextfile,usertrack)
+
+        print("Tiempo gastado en la carga de datos : ", resources[0]," ms" )
+        print("Memoria usada en la carga de datos : ",resources[1]," kb")
 
 
     elif int(inputs[0]) == 3:
@@ -83,9 +87,34 @@ while True:
             answer = controller.filterByChar(catalog, characteristic, loValue,hiValue)
             print("\n+++++++ Resultados Req No. 1 +++++++")
             print(characteristic + " entre " + str(loValue)+" - "+str(hiValue))
-            print("Reproducciones totales: "+str(answer[0])+" Artistas unicos: "+str(answer[1]))
+            print("Reproducciones totales: "+str(answer[0][0])+" Artistas unicos: "+str(answer[0][1]))
+            print("Tiempo gastado : ", answer[1]," ms")
+            print("Memoria consumida : ", answer[2]," kb")
         else:
             print("Los rangos ingresados no son validos o la categoria ingresada no existe")
+
+    elif int(inputs[0])==4:
+        #REQ2
+
+        lovalueE=float(input("Digite el rango minimo para energía "))
+        hivalueE=float(input("Digite el rango maximo para energía "))
+        lovalueD=float(input("Digite el rango minimo para danceabilidad "))
+        hivalueD=float(input("Digite el rango maximo para danceabilidad "))
+        correctValue=controller.verifyRanges(lovalueE,hivalueE) and controller.verifyRanges(lovalueD,hivalueD)
+        if correctValue:
+            answer=controller.filterByFeatures(catalog,lovalueE,hivalueE,lovalueD,hivalueD)
+            print("\n+++++++ Resultados Reto No. 2 ++++++")
+            print("Energia entre : ",lovalueE," - ",hivalueE)
+            print("Danceabilidad entre: ",lovalueD," - ",hivalueD)
+            controller.printReqTwo(answer[0])
+            print("Tiempo usado: ",answer[1]," ms")
+            print("Memoria consumida: ",answer[2]," kb")
+        else:
+            print("Los rangos ingresados no son validos")
+
+            
+
+
 
     elif int(inputs[0]) == 5:
         #REQ 3
