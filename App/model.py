@@ -55,16 +55,23 @@ def newCatalog():
 
     #catalog['trackList'] = lt.newList(datastructure='SINGLE_LINKED')
 
-    catalog['trackMap'] = om.newMap(omaptype='BST')
+    catalog['user-track-createdMap'] = om.newMap(omaptype='BST')
 
     catalog['eventMap'] = om.newMap(omaptype='BST')
+
+    catalog['trackMap'] = om.newMap(omaptype='BST')
 
     #catalog['artistMap'] = om.newMap(omaptype='BST')
 
     catalog['tempoMap'] = om.newMap(omaptype='RBT')
 
+    catalog['trackTempoMap'] = om.newMap(omaptype='RBT')
+
     catalog['genres'] = {'reggae':(60,90),'down-tempo':(70,100),'chill-out':(90,120),'hip-hop':(85,115),
                          'jazz and funk':(120,125),'pop':(100,130),"r&b":(60,80),'rock':(110,140),'metal':(100,160)}
+
+    catalog['characteristics'] = ['instrumentalness','liveness','speechiness','danceability',
+                                  'valence','acousticness','energy']
 
     return catalog
 
@@ -73,10 +80,16 @@ def newCatalog():
 # ==============================================
 
 def addUserTrack(catalog, usertrack):
-    #updateArtists(catalog['artistMap'],song)
-    updateUserTrack(usertrack,catalog['trackMap'])
-    #updateTracks(song,catalog['trackList'],catalog['trackMap'])
+    """
+    Durante la carga del archivo user-track se guarda en el mapa 'user-track-createdMap'
+    un evento unico identificado por (user+track+created)
+    """
+    userTrackMap = catalog['user-track-createdMap']
+    event = (usertrack['user_id'],usertrack['track_id'],usertrack['created_at'])
+    om.put(userTrackMap,event, usertrack)
 
+
+"""
 def updateArtists(map, song):
     artist = song['artist_id']
     exists = om.get(map,artist)
@@ -89,17 +102,24 @@ def updateArtists(map, song):
     else:
         existingList = me.getValue(exists)
         lt.addLast(existingList,song)
+"""
 
-def updateUserTrack(usertrack,trackMap):
-    event = (usertrack['user_id'],usertrack['track_id'],usertrack['created_at'])
-    
-    om.put(trackMap,event, usertrack)
-
-def eventInTrackMap(catalog, event):
+def eventInUserTrackMap(catalog, event):
     id_event =(event['user_id'],event['track_id'],event['created_at'])
+    track_id = event['track_id']
+    """
+    Para cada evento que se repite en los dos archivos se agrega a un RBT que los
+    clasifica por Tempo
+    Ademas se filtra por track_id para luego meter los tracks segun el Tempo en 
+    otro RBT
+    """
+    #Creando los mapas mirando si el evento se repite en ambos archivos
 
-    if om.contains(catalog['trackMap'],id_event):
+    if om.contains(catalog['user-track-createdMap'],id_event):
         om.put(catalog['eventMap'],id_event,event)
+        
+
+        #Creando el mapa 'tempoMap' segun eventos (user+track+created) unicos
 
         if om.contains(catalog['tempoMap'],float(event['tempo'])):
             couple = om.get(catalog['tempoMap'],float(event['tempo']))
@@ -110,8 +130,24 @@ def eventInTrackMap(catalog, event):
             list = lt.newList(datastructure='SINGLE_LINKED')
             lt.addLast(list,event)
         om.put(catalog['tempoMap'],float(event['tempo']),list)
-        
 
+        #Creando el mapa 'trackMap' segun tracks unicos y creando el trackTempoMap 
+
+        if om.contains(catalog['trackMap'],track_id) == False:
+            om.put(catalog['trackMap'],track_id,event)
+
+            if om.contains(catalog['trackTempoMap'],float(event['tempo'])):
+                couple = om.get(catalog['trackTempoMap'],float(event['tempo']))
+                list = me.getValue(couple)
+                lt.addLast(list,event)
+
+            else:
+                list = lt.newList(datastructure='SINGLE_LINKED')
+                lt.addLast(list,event)
+            om.put(catalog['trackTempoMap'],float(event['tempo']),list)
+
+ 
+""""
 def updateTracks(song,trackList,trackMap):
     track = song['track_id']
     exists_track = om.get(trackMap, track)
@@ -125,6 +161,7 @@ def updateTracks(song,trackList,trackMap):
     else:
         existingList = me.getValue(exists_track)
         lt.addLast(existingList,song)
+"""
 
 # ================================
 # Funciones para creacion de datos
@@ -170,6 +207,7 @@ def createCharList(charMap,loValue,hiValue):
     return charList
 """
 def createArtistMap(tempoList):
+    # FUNCION REQ 4
     map = mp.newMap(maptype='PROBING')
 
     iterator = slit.newIterator(tempoList)
@@ -180,6 +218,7 @@ def createArtistMap(tempoList):
         mp.put(map,artist,event)
     return mp.size(map)
 
+"""
 def createTempoMap(catalog, track_event):
     tempoMap = om.newMap(omaptype='RBT')
     songsList = catalog[track_event]
@@ -199,8 +238,13 @@ def createTempoMap(catalog, track_event):
             lt.addLast(existingList,song)
 
     return tempoMap
-
+"""
 def createTempoList(tempoMap, loTempo, hiTempo):
+    # FUNCION REQ 3, REQ 4
+    """
+    Recibe por parametro un RBT del tempo y los rangos, retorna una lista con 
+    los eventos/tracks que estan en ese rango
+    """
     listOfLists = om.values(tempoMap, loTempo, hiTempo)
     answerMap = mp.newMap(maptype='CHAINING',loadfactor=1.0,numelements=28000)
 
@@ -215,28 +259,37 @@ def createTempoList(tempoMap, loTempo, hiTempo):
             mp.put(answerMap, id, song)
     
     return mp.valueSet(answerMap)
-"""
+
 def createInstruList(tempoList,loInstru,hiInstru):
+    #FUNCION UNICA REQ 1
+    """
+    Recibe por parametro una lista con los tempos filtrados y rangos
+    de instrumentalidad, y retorna una lista de tracks con la instrumentalidad 
+    filtrada dentro de los rangos
+    """
     instruList = lt.newList(datastructure="SINGLE_LINKED")
 
     iterator = slit.newIterator(tempoList)
     while slit.hasNext(iterator):
-        song = slit.next(iterator)
+        event = slit.next(iterator)
 
-        if float(song['instrumentalness'])>= loInstru and float(song['instrumentalness'])<= hiInstru:
-            lt.addLast(instruList, song)
+        if float(event['instrumentalness'])>= loInstru and float(event['instrumentalness'])<= hiInstru:
+            lt.addLast(instruList, event)
 
     return instruList
-"""
+
 def createSubList(list, rank):
+    # FUNCION REQ 4
     sublist = lt.subList(list,1,rank)
     return sublist
 
 
 def filterByChar(catalog, characteristic, loValue,hiValue):
+    # FUNCION UNICA REQ 1
     list = om.valueSet(catalog['eventMap'])
     answerMap = mp.newMap(maptype='PROBNG', numelements=1800)
     counter = 0
+
 
     for event in lt.iterator(list):
         if float(loValue) <= float(event[characteristic]) <= float(hiValue):
@@ -275,6 +328,7 @@ def mapSize(map):
 # ====================================
 
 def askGenre(catalog):
+    # FUNCION UNICA REQ 4
     continuing = True
     genreList = []
     genreDictionary = catalog['genres']
@@ -294,7 +348,11 @@ def askGenre(catalog):
             newGenreName = input("Ingrese el nombre unico para el nuevo genero musical: ")
             loTempo = int(input("Digite el valor entero minimo del tempo del nuevo genero musical: "))
             hiTempo = int(input("Digite el valor entero maximo del tempo del nuevo genero musical: "))
-            genreDictionary[newGenreName] = (loTempo,hiTempo)
+            correct = verifyRanges(loTempo,hiTempo)
+            if correct:
+                genreDictionary[newGenreName] = (loTempo,hiTempo)
+            else:
+                print("Los rangos ingresados no son validos")
 
         elif action == 2:
             print("La lista de busqueda que tiene es la siguiente "+str(genreList))
@@ -310,25 +368,39 @@ def askGenre(catalog):
     
     return genreList
 
+def verifyRanges(loRange,hiRange):
+    """
+    Verifica que los rangos proporcionados por el usuario sean validos
+    """
+    correct = False
+    if (loRange <= hiRange) and loRange>=0 and hiRange>=0:
+        correct = True
+    return correct
+
 
 # =======================
 # Funciones para imprimir
 # =======================
 
 def printReqThree(list,loInstru,hiInstru,loTempo,hiTempo):
-    randomList = random.sample(range(1, lt.size(list)), 5)
+    # FUNCION UNICA REQ 3
+    top = 5
+    if top > lt.size(list):
+        top = lt.size(list)
+    randomList = random.sample(range(1, lt.size(list)), top)
     counter = 1
-    print("\n+++++++ Resultados Req No. 1 +++++++")
+    print("\n+++++++ Resultados Req No. 3 +++++++")
     print("Instrumentalidad entre: "+ str(loInstru)+" - "+str(hiInstru))
     print("Tempo entre: "+ str(loTempo)+" - "+str(hiTempo))
     print("Total de tracks encontrados: "+str(lt.size(list)))
     print("")
     for i in randomList:
         song = lt.getElement(list, i)
-        print("Track "+str(counter)+": "+ song['track_id']+" con instrumentalness de: "+str(song['instrumentalness'])+" y tempo de: "+str(song['tempo']))
+        print("Track "+str(counter)+": "+ song['track_id']+" con instrumentalness de: "+str(song['instrumentalness'])+" y tempo de: "+str(song['tempo'])+str(song['created_at']))
         counter +=1
 
 def printReqFour(genreResults,totalReproductions):
+    # FUNCION UNICA REQ 4
     print("\n+++++++ Resultados Req No. 4 +++++++")
     print("Total de reproducciones: "+str(totalReproductions))
     for genre in genreResults.keys():
@@ -347,3 +419,4 @@ def printReqFour(genreResults,totalReproductions):
         while slit.hasNext(iterator):
             event = slit.next(iterator)
             print("Artista "+str(counter)+": "+event['artist_id'])
+            counter +=1

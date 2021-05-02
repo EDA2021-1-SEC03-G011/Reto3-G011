@@ -40,18 +40,16 @@ def init():
 # Funciones para la carga de datos
 # =================================
 
-def loadData(catalog, musicfile,usertrack):
+def loadData(catalog, contextfile,usertrack):
     usertrack = cf.data_dir + usertrack
     input_file = csv.DictReader(open(usertrack, encoding = 'utf-8'), delimiter=",") 
     for song in input_file:
         model.addUserTrack(catalog, song)
     
-    context = cf.data_dir + musicfile
+    context = cf.data_dir + contextfile
     input_file = csv.DictReader(open(context, encoding = 'utf-8'), delimiter=",") 
     for event in input_file:
-        model.eventInTrackMap(catalog, event)
-
-    
+        model.eventInUserTrackMap(catalog, event)
 
     return catalog
 
@@ -69,22 +67,26 @@ def createCharList(charMap,loValue,hiValue):
     return model.createCharList(charMap,loValue,hiValue)
 """
 def createArtistMap(charList):
+    # FUNCION REQ 4
     return model.createArtistMap(charList)
 """
 def createTempoMap(catalog,track_event):
     return model.createTempoMap(catalog,track_event)
 """
 def createTempoList(tempoMap, loTempo, hiTempo):
+    # FUNCION REQ 3, REQ 4
     return model.createTempoList(tempoMap, loTempo, hiTempo)
-"""
+
 def createInstruList(tempoList,loInstru,hiInstru):
+    # FUNCION UNICA REQ 3
     return model.createInstruList(tempoList,loInstru,hiInstru)
-"""
+
 def createSubList(list, rank):
+    # FUNCION REQ 4
     return model.createSubList(list, rank)
 
-
 def filterByChar(catalog, characteristic, loValue,hiValue):
+    # FUNCION UNICA REQ 1
     return model.filterByChar(catalog, characteristic, loValue,hiValue)
 
 # ========================================
@@ -111,14 +113,21 @@ def mapSize(map):
 # ====================================
 
 def askGenre(catalog):
+    # FUNCION UNICA REQ 4
     return model.askGenre(catalog)
+
+def verifyRanges(loRange,hiRange):
+    # FUNCION REQ1, REQ 3, REQ 4
+    return model.verifyRanges(loRange,hiRange)
 
 # =======================
 # Funciones para imprimir
 # =======================
 
 def printReqThree(list,loInstru,hiInstru,loTempo,hiTempo):
+    # FUNCION UNICA REQ 3
     model.printReqThree(list,loInstru,hiInstru,loTempo,hiTempo)
 
 def printReqFour(genreResults,totalReproductions):
+    # FUNCION UNICA REQ 4
     model.printReqFour(genreResults,totalReproductions)

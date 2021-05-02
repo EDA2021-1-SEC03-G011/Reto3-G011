@@ -37,7 +37,7 @@ operación solicitada
 # Ruta a los archivos
 # ====================
 
-musicfile = 'subsamples-small/context_content_features-small.csv'
+contextfile = 'subsamples-small/context_content_features-small.csv'
 usertrack = 'subsamples-small/user_track_hashtag_timestamp-small.csv'
 catalog = None
 
@@ -54,34 +54,40 @@ def printMenu():
     print("3- Caracterizar las reproducciones")
     print("5- Encontrar musica para estudiar")
     print("6- Estudiar los generos musicales")
-    print("/-/-/-/-/-/-/-/-/-/-/-/-/-/-/")
+    print("/-/-/-/-/-/-/-/-/-/-/-/-/-/-/\n")
 
 catalog = None
+
 
 """
 Menu principal
 """
 while True:
     printMenu()
-    inputs = input('Seleccione una opción para continuar\n')
+    inputs = input('Seleccione una opción para continuar: \n')
     if int(inputs[0]) == 1:
         print("Inicializando ....")
         catalog = controller.init()
 
     elif int(inputs[0]) == 2:
         print("Cargando información de los archivos ....")
-        controller.loadData(catalog, musicfile,usertrack)
+        controller.loadData(catalog, contextfile,usertrack)
 
 
     elif int(inputs[0]) == 3:
         #REQ 1
-        characteristic = input("Bajo que caracteristica desea buscar: ")
+        characteristic = (input("Bajo que caracteristica desea buscar: ")).lower()
         loValue = float(input("Digite el valor minimo de la caracteristica del contenido: "))
         hiValue = float(input("Digite el valor maximo de la caracteristica del contenido: "))
-        answer = controller.filterByChar(catalog, characteristic, loValue,hiValue)
-        print("\n+++++++ Resultados Req No. 1 +++++++")
-        print(characteristic + " entre " + str(loValue)+" - "+str(hiValue))
-        print("Reproducciones totales: "+str(answer[0])+" Artistas unicos: "+str(answer[1]))
+        correctValue = controller.verifyRanges(loValue,hiValue)
+        correctChar = characteristic in catalog['characteristics']
+        if correctValue and correctChar:
+            answer = controller.filterByChar(catalog, characteristic, loValue,hiValue)
+            print("\n+++++++ Resultados Req No. 1 +++++++")
+            print(characteristic + " entre " + str(loValue)+" - "+str(hiValue))
+            print("Reproducciones totales: "+str(answer[0])+" Artistas unicos: "+str(answer[1]))
+        else:
+            print("Los rangos ingresados no son validos o la categoria ingresada no existe")
 
     elif int(inputs[0]) == 5:
         #REQ 3
@@ -89,10 +95,15 @@ while True:
         hiInstru = float(input("Digite el valor maximo para la instrumentalidad: "))
         loTempo = float(input("Digite el valor minimo para el tempo: "))
         hiTempo = float(input("Digite el valor maximo para el tempo: "))
-        tempoMap = controller.createTempoMap(catalog, 'trackList')
-        tempoList = controller.createTempoList(tempoMap, loTempo, hiTempo)
-        instruList = controller.createInstruList(tempoList,loInstru,hiInstru)
-        controller.printReqThree(instruList,loInstru,hiInstru,loTempo,hiTempo)
+        correctInstru = controller.verifyRanges(loInstru,hiInstru)
+        correctTempo = controller.verifyRanges(loTempo,hiTempo)
+        if correctInstru and correctTempo:
+            tempoMap = catalog['trackTempoMap']
+            tempoList = controller.createTempoList(tempoMap, loTempo, hiTempo)
+            instruList = controller.createInstruList(tempoList,loInstru,hiInstru)
+            controller.printReqThree(instruList,loInstru,hiInstru,loTempo,hiTempo)
+        else:
+            print("Los rangos ingresados no son validos")
 
     elif int(inputs[0]) == 6:
         #REQ 4
