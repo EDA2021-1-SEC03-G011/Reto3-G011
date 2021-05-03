@@ -86,10 +86,6 @@ def createTempoList(tempoMap, loTempo, hiTempo):
     # FUNCION REQ 3, REQ 4
     return model.createTempoList(tempoMap, loTempo, hiTempo)
 
-def createInstruList(tempoList,loInstru,hiInstru):
-    # FUNCION UNICA REQ 3
-    return model.createInstruList(tempoList,loInstru,hiInstru)
-
 def createSubList(list, rank):
     # FUNCION REQ 4
     return model.createSubList(list, rank)
@@ -115,8 +111,10 @@ def filterByChar(catalog, characteristic, loValue,hiValue):
     delta_memory = deltaMemory(start_memory, stop_memory)
 
     return values,delta_time,delta_memory
+
+
 def filterByFeatures(catalog,lovalueE,hivalueE,lovalueD,hivalueD):
-    #FUNCION UNICA REQ2
+    # FUNCION UNICA REQ 2
 
     delta_time = -1.0
     delta_memory = -1.0
@@ -136,6 +134,29 @@ def filterByFeatures(catalog,lovalueE,hivalueE,lovalueD,hivalueD):
     delta_memory = deltaMemory(start_memory, stop_memory)
 
     return values,delta_time,delta_memory
+
+def createTempoInstruList(tempoMap,loTempo, hiTempo,loInstru,hiInstru):
+    # FUNCION UNICA REQ 2
+    delta_time = -1.0
+    delta_memory = -1.0
+
+    tracemalloc.start()
+
+    start_time = getTime()
+    start_memory = getMemory()
+
+    answer =  model.createTempoInstruList(tempoMap,loTempo, hiTempo,loInstru,hiInstru)
+
+    stop_memory = getMemory()
+    stop_time = getTime()
+    tracemalloc.stop()
+
+    delta_time = stop_time - start_time
+    delta_memory = deltaMemory(start_memory, stop_memory)
+
+    return answer,delta_time,delta_memory
+
+
 # ========================================
 # Funciones de consulta sobre el catálogo
 # ========================================
@@ -173,7 +194,10 @@ def verifyRanges(loRange,hiRange):
 
 
 def printReqTwo(answer):
+    # FUNCION UNICA REQ 2
     model.printReqTwo(answer)
+
+
 def printReqThree(list,loInstru,hiInstru,loTempo,hiTempo):
     # FUNCION UNICA REQ 3
     model.printReqThree(list,loInstru,hiInstru,loTempo,hiTempo)

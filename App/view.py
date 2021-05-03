@@ -50,7 +50,7 @@ def printMenu():
     print("1- Inicializar el catalogo")
     print("2- Cargar información en el catálogo")
     print("3- Caracterizar las reproducciones")
-    print("4-Encontrar musica para festejar")
+    print("4- Encontrar musica para festejar")
     print("5- Encontrar musica para estudiar")
     print("6- Estudiar los generos musicales")
     print("/-/-/-/-/-/-/-/-/-/-/-/-/-/-/\n")
@@ -93,13 +93,14 @@ while True:
         else:
             print("Los rangos ingresados no son validos o la categoria ingresada no existe")
 
+
     elif int(inputs[0])==4:
         #REQ2
 
-        lovalueE=float(input("Digite el rango minimo para energía "))
-        hivalueE=float(input("Digite el rango maximo para energía "))
-        lovalueD=float(input("Digite el rango minimo para danceabilidad "))
-        hivalueD=float(input("Digite el rango maximo para danceabilidad "))
+        lovalueE=float(input("Digite el rango minimo para energía: "))
+        hivalueE=float(input("Digite el rango maximo para energía: "))
+        lovalueD=float(input("Digite el rango minimo para danceabilidad: "))
+        hivalueD=float(input("Digite el rango maximo para danceabilidad: "))
         correctValue=controller.verifyRanges(lovalueE,hivalueE) and controller.verifyRanges(lovalueD,hivalueD)
         if correctValue:
             answer=controller.filterByFeatures(catalog,lovalueE,hivalueE,lovalueD,hivalueD)
@@ -112,10 +113,7 @@ while True:
         else:
             print("Los rangos ingresados no son validos")
 
-            
-
-
-
+        
     elif int(inputs[0]) == 5:
         #REQ 3
         loInstru = float(input("Digite el valor minimo para la instrumentalidad: "))
@@ -125,10 +123,11 @@ while True:
         correctInstru = controller.verifyRanges(loInstru,hiInstru)
         correctTempo = controller.verifyRanges(loTempo,hiTempo)
         if correctInstru and correctTempo:
-            tempoMap = catalog['trackTempoMap']
-            tempoList = controller.createTempoList(tempoMap, loTempo, hiTempo)
-            instruList = controller.createInstruList(tempoList,loInstru,hiInstru)
-            controller.printReqThree(instruList,loInstru,hiInstru,loTempo,hiTempo)
+            tempoMap = catalog['tempoMap']
+            instruList = controller.createTempoInstruList(tempoMap,loTempo, hiTempo,loInstru,hiInstru)
+            controller.printReqThree(instruList[0],loInstru,hiInstru,loTempo,hiTempo)
+            print("Tiempo usado: ",answer[1]," ms")
+            print("Memoria consumida: ",answer[2]," kb")
         else:
             print("Los rangos ingresados no son validos")
 

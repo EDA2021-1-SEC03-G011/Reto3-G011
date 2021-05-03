@@ -56,13 +56,9 @@ def newCatalog():
 
     catalog['eventMap'] = om.newMap(omaptype='BST')
 
-    catalog['trackMap'] = om.newMap(omaptype='BST')
-
     catalog['tempoMap'] = om.newMap(omaptype='RBT')
 
     catalog["danceability"]=om.newMap(omaptype='RBT')
-
-    catalog['trackTempoMap'] = om.newMap(omaptype='RBT')
 
     catalog['genres'] = {'reggae':(60,90),'down-tempo':(70,100),'chill-out':(90,120),'hip-hop':(85,115),
                          'jazz and funk':(120,125),'pop':(100,130),"r&b":(60,80),'rock':(110,140),'metal':(100,160)}
@@ -113,21 +109,6 @@ def eventInUserTrackMap(catalog, event):
             list = lt.newList(datastructure='SINGLE_LINKED')
             lt.addLast(list,event)
         om.put(catalog['tempoMap'],float(event['tempo']),list)
-
-        #Creando el mapa 'trackMap' segun tracks unicos y creando el trackTempoMap 
-
-        if om.contains(catalog['trackMap'],track_id) == False:
-            om.put(catalog['trackMap'],track_id,event)
-
-            if om.contains(catalog['trackTempoMap'],float(event['tempo'])):
-                couple = om.get(catalog['trackTempoMap'],float(event['tempo']))
-                list = me.getValue(couple)
-                lt.addLast(list,event)
-
-            else:
-                list = lt.newList(datastructure='SINGLE_LINKED')
-                lt.addLast(list,event)
-            om.put(catalog['trackTempoMap'],float(event['tempo']),list)
 
         #Agrega el evento a un RBT segun su danceabilidad
         
@@ -181,24 +162,27 @@ def createTempoList(tempoMap, loTempo, hiTempo):
     return mp.valueSet(answerMap)
 
 
-def createInstruList(tempoList,loInstru,hiInstru):
-    #FUNCION UNICA REQ 1
+def createTempoInstruList(tempoMap,loTempo, hiTempo,loInstru,hiInstru):
+    #FUNCION UNICA REQ 3
     """
-    Recibe por parametro una lista con los tempos filtrados y rangos
-    de instrumentalidad, y retorna una lista de tracks con la instrumentalidad 
-    filtrada dentro de los rangos
+    Recibe por parametro un mapa con los tempos y lo convierte a una lista con los tempos filtrados,
+    retorna una lista de tracks con la instrumentalidad filtrada dentro de los rangos
     """
-    instruList = lt.newList(datastructure="SINGLE_LINKED")
+    listOfLists = om.values(tempoMap, loTempo, hiTempo)
+    answerMap = mp.newMap(maptype='CHAINING',loadfactor=1.0,numelements=28000)
 
-    iterator = slit.newIterator(tempoList)
-    while slit.hasNext(iterator):
-        event = slit.next(iterator)
+    iteratorLists = slit.newIterator(listOfLists)
+    while slit.hasNext(iteratorLists):
+        list = slit.next(iteratorLists)
 
-        if float(event['instrumentalness'])>= loInstru and float(event['instrumentalness'])<= hiInstru:
-            lt.addLast(instruList, event)
+        iteratorSongs = slit.newIterator(list)
+        while slit.hasNext(iteratorSongs):
+            song = slit.next(iteratorSongs)
+            track_id = song['track_id']
+            if float(song['instrumentalness'])>= loInstru and float(song['instrumentalness'])<= hiInstru:
+                mp.put(answerMap, track_id, song)
 
-    return instruList
-
+    return mp.valueSet(answerMap)
 
 def createSubList(list, rank):
     # FUNCION REQ 4
@@ -221,6 +205,7 @@ def filterByChar(catalog, characteristic, loValue,hiValue):
     return (counter, mp.size(answerMap))
 
 def filterByFeatures(catalog,lovalueE,hivalueE,lovalueD,hivalueD):
+    # FUNCION UNICA REQ 2
 
     finalmap=mp.newMap(numelements=2000,maptype='PROBING')
     listValues=om.values(catalog["danceability"],lovalueD,hivalueD)
@@ -351,7 +336,7 @@ def printReqThree(list,loInstru,hiInstru,loTempo,hiTempo):
     print("")
     for i in randomList:
         song = lt.getElement(list, i)
-        print("Track "+str(counter)+": "+ song['track_id']+" con instrumentalness de: "+str(song['instrumentalness'])+" y tempo de: "+str(song['tempo'])+str(song['created_at']))
+        print("Track "+str(counter)+": "+ song['track_id']+" con instrumentalness de: "+str(song['instrumentalness'])+" y tempo de: "+str(song['tempo']))
         counter +=1
 
 def printReqFour(genreResults,totalReproductions):
