@@ -32,6 +32,7 @@ from DISClib.ADT import orderedmap as om
 from DISClib.DataStructures import mapentry as me
 from DISClib.Algorithms.Sorting import shellsort as sa
 from DISClib.DataStructures import linkedlistiterator as slit
+from datetime import datetime
 assert cf
 
 """
@@ -45,9 +46,7 @@ los mismos.
 def newCatalog():
     catalog = {'user-track-createdMap':None,
                'eventMap':None,
-               'trackMap':None,
                'tempoMap':None,
-               'trackTempoMap':None,
                'genres':None,
                'characteristics':None
                }
@@ -58,7 +57,15 @@ def newCatalog():
 
     catalog['tempoMap'] = om.newMap(omaptype='RBT')
 
+    catalog['trackMap'] = om.newMap(omaptype='BST')
+
     catalog["danceability"]=om.newMap(omaptype='RBT')
+
+    catalog['timeMap'] = om.newMap(omaptype='RBT')
+
+    catalog['artists'] = mp.newMap(maptype='CHAINING',numelements=5000,loadfactor=1.0)
+
+    catalog['tracks'] = mp.newMap(maptype='CHAINING',numelements=31000,loadfactor=1.0)
 
     catalog['genres'] = {'reggae':(60,90),'down-tempo':(70,100),'chill-out':(90,120),'hip-hop':(85,115),
                          'jazz and funk':(120,125),'pop':(100,130),"r&b":(60,80),'rock':(110,140),'metal':(100,160)}
@@ -84,8 +91,11 @@ def addUserTrack(catalog, usertrack):
 
 def eventInUserTrackMap(catalog, event):
     id_event =(event['user_id'],event['track_id'],event['created_at'])
-    track_id = event['track_id']
     danceability=float(event['danceability'])
+    track_id = event['track_id']
+
+    time = datetime.strptime(event['created_at'],"%Y-%m-%d %H:%M:%S")
+    seconds = time.hour*3600 + time.minute*60 +time.second
     """
     Para cada evento que se repite en los dos archivos se agrega a un RBT que los
     clasifica por Tempo
@@ -96,7 +106,8 @@ def eventInUserTrackMap(catalog, event):
 
     if om.contains(catalog['user-track-createdMap'],id_event):
         om.put(catalog['eventMap'],id_event,event)
-        
+        mp.put(catalog['artists'],event['artist_id'],event)
+        mp.put(catalog['tracks'],event['track_id'],event)
 
         #Creando el mapa 'tempoMap' segun eventos (user+track+created) unicos
 
@@ -111,18 +122,43 @@ def eventInUserTrackMap(catalog, event):
         om.put(catalog['tempoMap'],float(event['tempo']),list)
 
         #Agrega el evento a un RBT segun su danceabilidad
-        
+       
         if om.contains(catalog["danceability"],danceability):
             couple=om.get(catalog["danceability"],danceability)
             map=me.getValue(couple)
         else:
-            map=mp.newMap(maptype="PROBING",numelements=10)
+            map=mp.newMap(maptype="PROBING",numelements=20) #TODO Verificar para el tiempo de carga de datos
 
         mp.put(map,id_event,event)
         om.put(catalog["danceability"],danceability,map)
 
+        #Creando el mapa 'timeMap' segun las horas pasadas a segundos
+
+        if om.contains(catalog['timeMap'],seconds):
+            keyValue = om.get(catalog['timeMap'],seconds)
+            timeList = me.getValue(keyValue)
+            lt.addLast(timeList,event)
+
+        else:
+            timeList = lt.newList(datastructure='SINGLE_LINKED')
+            lt.addLast(timeList,event)
+        om.put(catalog['timeMap'],seconds,timeList)
+
+        #Creando el mapa 'trackMap' por track_id con valores listas con los eventos de ese track_id
+
+        if om.contains(catalog['trackMap'],track_id):
+            trackCouple = om.get(catalog['trackMap'],track_id)
+            trackList = me.getValue(trackCouple)
+            lt.addLast(trackList,event)
+
+        else:
+            trackList = lt.newList(datastructure='SINGLE_LINKED')
+            lt.addLast(trackList,event)
+        om.put(catalog['trackMap'],track_id,trackList)
 
 
+
+        
 # ================================
 # Funciones para creacion de datos
 # ================================
@@ -220,20 +256,30 @@ def filterByFeatures(catalog,lovalueE,hivalueE,lovalueD,hivalueD):
     return mp.valueSet(finalmap)
 
 
+def filterByTime(timeMap, loHour, hiHour):
+    listOfLists = om.values(timeMap, loHour, hiHour)
+    answerMap = mp.newMap(maptype='CHAINING',loadfactor=1.0,numelements=28000)
+    #answerList = lt.newList(datastructure='SINGLE_LIKED')
 
+    for list in lt.iterator(listOfLists):
+        for event in lt.iterator(list):
+            mp.put(answerMap,event['track_id'],event)
+            #lt.addLast(answerList,event)
+
+    return mp.size(answerMap)
 
 # =====================    
 # Funciones de consulta
 # =====================
 
 def eventsSize(catalog):
-    return lt.size(catalog['eventList'])
+    return om.size(catalog['eventMap'])
 
 def artistsSize(catalog):
-    return om.size(catalog['artistMap'])
+    return mp.size(catalog['artists'])
 
 def tracksSize(catalog):
-    return om.size(catalog['trackMap'])
+    return mp.size(catalog['tracks'])
 
 def uniqueSongsChar(charList):
     return lt.size(charList)
@@ -300,6 +346,10 @@ def verifyRanges(loRange,hiRange):
         correct = True
     return correct
 
+def timeInSeconds(hour):
+    time = hour.split(":")
+    seconds = int(time[0])*3600 + int(time[1])*60 + int(time[2])
+    return seconds
 
 # =======================
 # Funciones para imprimir

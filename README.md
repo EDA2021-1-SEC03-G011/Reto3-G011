@@ -1,8 +1,9 @@
 #ISIS1225 - Librerias de soporte
 
 #-------------------------------#
-Estudiante A: Juan Sebastian Castro (201813107) (js.castrog@uniandes.edu.co) 
-Estudiante B: Juan Diego Calixto (202020774) (j.calixto@uniandes.edu.co) #-------------------------------#
+Estudiante A: Pablo Alejandro Guatibonza (202014393) (p.guatibonza@uniandes.edu.co) 
+Estudiante B: Juan Diego Calixto (202020774) (j.calixto@uniandes.edu.co)
+#-------------------------------#
 
 Este proyecto contiene los Tipos abstractos de datos, estructuras de datos y algoritmos requeridos por el curso ISIS1225-Estructuras de Datos y Algoritmos
 

@@ -39,6 +39,7 @@ operación solicitada
 
 contextfile = 'subsamples-small/context_content_features-small.csv'
 usertrack = 'subsamples-small/user_track_hashtag_timestamp-small.csv'
+sentiment = 'subsamples-small/sentiment_values.csv'
 
 # ====================
 # Menu principal
@@ -53,6 +54,7 @@ def printMenu():
     print("4- Encontrar musica para festejar")
     print("5- Encontrar musica para estudiar")
     print("6- Estudiar los generos musicales")
+    print("7- Indicar el género musical más escuchado en el tiempo")
     print("/-/-/-/-/-/-/-/-/-/-/-/-/-/-/\n")
 
 catalog = None
@@ -71,7 +73,12 @@ while True:
     elif int(inputs[0]) == 2:
         print("\nCargando información de los archivos ....")
         resources=controller.loadData(catalog, contextfile,usertrack)
-
+        artists = controller.artistsSize(catalog)
+        tracks = controller.tracksSize(catalog)
+        events = controller.eventsSize(catalog)
+        print("La cantidad de artistas caragados es: "+str(artists))
+        print("La cantidad de tracks caragados es: "+str(tracks))
+        print("La cantidad de eventos caragados es: "+str(events))
         print("Tiempo gastado en la carga de datos : ", resources[0]," ms" )
         print("Memoria usada en la carga de datos : ",resources[1]," kb")
 
@@ -148,7 +155,17 @@ while True:
             genreResults[genre]={'tempo':(loTempo,hiTempo),'reproductions':reproductions,'artists':artistsMap, 'list':eventList}
 
         controller.printReqFour(genreResults,totalReproductions)
-            
+
+    elif int(inputs[0]) == 7:
+        loHour = input("Digite el valor minimo de la hora del dia con formato (HH:MM:SS): ")
+        hiHour = input("Digite el valor maximo de la hora del dia con formato (HH:MM:SS): ")
+        loHour = controller.timeInSeconds(loHour)
+        hiHour = controller.timeInSeconds(hiHour)
+        if controller.verifyRanges(loHour,hiHour):
+            answer = controller.filterByTime(catalog['timeMap'],loHour,hiHour)
+            print(answer)
+        else: 
+            print("Los rangos ingresados no son validos")
     else:
         sys.exit(0)
 sys.exit(0)

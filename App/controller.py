@@ -156,6 +156,9 @@ def createTempoInstruList(tempoMap,loTempo, hiTempo,loInstru,hiInstru):
 
     return answer,delta_time,delta_memory
 
+def filterByTime(timeMap,loHour,hiHour):
+    return model.filterByTime(timeMap,loHour,hiHour)
+
 
 # ========================================
 # Funciones de consulta sobre el catálogo
@@ -187,6 +190,9 @@ def askGenre(catalog):
 def verifyRanges(loRange,hiRange):
     # FUNCION REQ1, REQ 3, REQ 4
     return model.verifyRanges(loRange,hiRange)
+
+def timeInSeconds(hour):
+    return model.timeInSeconds(hour)
 
 # =======================
 # Funciones para imprimir
