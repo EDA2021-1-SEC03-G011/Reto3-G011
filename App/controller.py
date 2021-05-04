@@ -156,8 +156,11 @@ def createTempoInstruList(tempoMap,loTempo, hiTempo,loInstru,hiInstru):
 
     return answer,delta_time,delta_memory
 
-def filterByTime(timeMap,loHour,hiHour):
-    return model.filterByTime(timeMap,loHour,hiHour)
+def filterByTime(timeMap,loHour,hiHour,catalog):
+    return model.filterByTime(timeMap,loHour,hiHour,catalog)
+
+def findTopGenre(genresDict):
+    return model.findTopGenre(genresDict)
 
 
 # ========================================

@@ -256,17 +256,42 @@ def filterByFeatures(catalog,lovalueE,hivalueE,lovalueD,hivalueD):
     return mp.valueSet(finalmap)
 
 
-def filterByTime(timeMap, loHour, hiHour):
+def filterByTime(timeMap, loHour, hiHour,catalog):
     listOfLists = om.values(timeMap, loHour, hiHour)
-    answerMap = mp.newMap(maptype='CHAINING',loadfactor=1.0,numelements=28000)
-    #answerList = lt.newList(datastructure='SINGLE_LIKED')
+    genres ={}
+    for genre in catalog['genres'].keys():
+        genres[genre] = mp.newMap(numelements=5000, maptype='PROBING',loadfactor=1.0)
 
     for list in lt.iterator(listOfLists):
         for event in lt.iterator(list):
-            mp.put(answerMap,event['track_id'],event)
-            #lt.addLast(answerList,event)
+            id_event =(event['user_id'],event['track_id'],event['created_at'])
+            for genre in catalog['genres'].keys():
+                if catalog['genres'][genre][0] <= float(event['tempo']) <= catalog['genres'][genre][1]:
+                    mp.put(genres[genre],id_event,event )
+            
+    return genres
 
-    return mp.size(answerMap)
+
+def findTopGenre(genresDict):
+    top = []
+    orderedDict = {}
+    topGenre = ""
+    
+    for genreList in genresDict.values():
+        top.append(lt.size(genreList))
+    top.sort(reverse = True)
+
+    for rep in top:
+        for genre in genresDict.keys():
+            if lt.size(genresDict[genre]) == rep:
+                orderedDict[genre] = rep
+
+    for genre in genresDict.keys():
+        if lt.size(genresDict[genre]) == top[0]:
+            topGenre = genre
+
+    return orderedDict, topGenre
+
 
 # =====================    
 # Funciones de consulta

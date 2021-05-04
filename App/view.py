@@ -162,7 +162,8 @@ while True:
         loHour = controller.timeInSeconds(loHour)
         hiHour = controller.timeInSeconds(hiHour)
         if controller.verifyRanges(loHour,hiHour):
-            answer = controller.filterByTime(catalog['timeMap'],loHour,hiHour)
+            genresDict = controller.filterByTime(catalog['timeMap'],loHour,hiHour,catalog)
+            answer = controller.findTopGenre(genresDict)
             print(answer)
         else: 
             print("Los rangos ingresados no son validos")
