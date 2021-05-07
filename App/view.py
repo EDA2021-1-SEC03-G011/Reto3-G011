@@ -164,7 +164,7 @@ while True:
         if controller.verifyRanges(loHour,hiHour):
             genresDict = controller.filterByTime(catalog['timeMap'],loHour,hiHour,catalog)
             answer = controller.findTopGenre(genresDict)
-            print(answer)
+            answer2 = controller.findVaderAvg(catalog,'3d02f9fcad37e6bb227682761039498c')
         else: 
             print("Los rangos ingresados no son validos")
     else:

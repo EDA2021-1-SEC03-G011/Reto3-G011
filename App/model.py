@@ -88,6 +88,7 @@ def addUserTrack(catalog, usertrack):
     Durante la carga del archivo user-track se guarda en el mapa 'user-track-createdMap'
     un evento unico identificado por (user+track+created)
     """
+    usertrack['hashtag']=usertrack['hashtag'].lower()
     userTrackMap = catalog['user-track-createdMap']
     event = (usertrack['user_id'],usertrack['track_id'],usertrack['created_at'])
     mp.put(userTrackMap,event, usertrack)
@@ -108,7 +109,7 @@ def eventInUserTrackMap(catalog, event):
     """
     #Creando los mapas mirando si el evento se repite en ambos archivos
 
-    if om.contains(catalog['user-track-createdMap'],id_event):
+    if mp.contains(catalog['user-track-createdMap'],id_event):
         om.put(catalog['eventMap'],id_event,event)
 
         #creando mapa para los artistas
@@ -173,7 +174,7 @@ def eventInUserTrackMap(catalog, event):
         om.put(catalog['trackMap'],track_id,trackList)
 
 def addSentimentValues(catalog,vader):
-    id=vader['hashtag']
+    id=vader['hashtag'].lower()
     value=vader['vader_avg']
     mp.put(catalog['sentiment_values'],id,value)
     
@@ -316,21 +317,29 @@ def findTopGenre(genresDict):
 def findVaderAvg(catalog,track): #recibe como parametro el id de la canción y retorna la cantidad total de hashtags y su promedio de vader
     couple=mp.get(catalog["tracks"],track)
     value=me.getValue(couple)
+    print('mapa',mp.size(value))
     values=mp.valueSet(value)
-    contador=0
-    cantidad=0
+    counter_mean=0
+    quantity=0
+    counter_hashtags =0
     for event in lt.iterator(values):
         id_event=(event["user_id"],event["track_id"],event["created_at"])
         couple2=mp.get(catalog["user-track-createdMap"],id_event)
         eventTrack=me.getValue(couple2)["hashtag"]
-
+        print(couple2, eventTrack)
         couple2=mp.get(catalog["sentiment_values"],eventTrack)
-        vader=me.getValue(couple2)
+        if couple2 is not None:
 
-        if vader!="":
-            cantidad+=float(vader)
-            contador+=1
-    return contador,cantidad
+            vader=me.getValue(couple2)
+
+            if vader!="":
+                quantity+=float(vader)
+                counter_mean+=1
+        
+        counter_hashtags += 1
+    quantity /= counter_mean
+
+    return counter_hashtags, quantity
 
 
 

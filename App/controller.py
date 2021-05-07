@@ -187,6 +187,9 @@ def uniqueSongsChar(charList):
 def mapSize(map):
     return model.mapSize(map)
 
+def findVaderAvg(catalog,track):
+    return model.findVaderAvg(catalog,track)
+
 # ====================================
 # Funciones creacion datos por usuario
 # ====================================
