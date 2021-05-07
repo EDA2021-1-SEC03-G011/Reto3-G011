@@ -48,10 +48,11 @@ def newCatalog():
                'eventMap':None,
                'tempoMap':None,
                'genres':None,
-               'characteristics':None
+               'characteristics':None,
+               'sentiment_values':None
                }
 
-    catalog['user-track-createdMap'] = om.newMap(omaptype='BST')
+    catalog['user-track-createdMap'] = mp.newMap(maptype='PROBING',numelements=80000) #se cambio a tabla de hash para acceder mas rapido a sus valores
 
     catalog['eventMap'] = om.newMap(omaptype='BST')
 
@@ -72,6 +73,9 @@ def newCatalog():
 
     catalog['characteristics'] = ['instrumentalness','liveness','speechiness','danceability',
                                   'valence','acousticness','energy']
+    catalog['sentiment_values']=mp.newMap(numelements=5300,loadfactor=1.0)
+
+
 
     return catalog
 
@@ -86,7 +90,7 @@ def addUserTrack(catalog, usertrack):
     """
     userTrackMap = catalog['user-track-createdMap']
     event = (usertrack['user_id'],usertrack['track_id'],usertrack['created_at'])
-    om.put(userTrackMap,event, usertrack)
+    mp.put(userTrackMap,event, usertrack)
 
 
 def eventInUserTrackMap(catalog, event):
@@ -106,8 +110,20 @@ def eventInUserTrackMap(catalog, event):
 
     if om.contains(catalog['user-track-createdMap'],id_event):
         om.put(catalog['eventMap'],id_event,event)
+
+        #creando mapa para los artistas
+        if not mp.contains(catalog['tracks'],event['track_id']):
+            trackmap=mp.newMap(numelements=10,loadfactor=1.0)
+        else:
+            couple=mp.get(catalog["tracks"],event["track_id"])
+            trackmap=me.getValue(couple)
+
+        mp.put(trackmap,id_event,event)
+        mp.put(catalog["tracks"],event["track_id"],trackmap)
+
+
         mp.put(catalog['artists'],event['artist_id'],event)
-        mp.put(catalog['tracks'],event['track_id'],event)
+        
 
         #Creando el mapa 'tempoMap' segun eventos (user+track+created) unicos
 
@@ -156,6 +172,11 @@ def eventInUserTrackMap(catalog, event):
             lt.addLast(trackList,event)
         om.put(catalog['trackMap'],track_id,trackList)
 
+def addSentimentValues(catalog,vader):
+    id=vader['hashtag']
+    value=vader['vader_avg']
+    mp.put(catalog['sentiment_values'],id,value)
+    
 
 
         
@@ -291,6 +312,30 @@ def findTopGenre(genresDict):
             topGenre = genre
 
     return orderedDict, topGenre
+
+def findVaderAvg(catalog,track): #recibe como parametro el id de la canción y retorna la cantidad total de hashtags y su promedio de vader
+    couple=mp.get(catalog["tracks"],track)
+    value=me.getValue(couple)
+    values=mp.valueSet(value)
+    contador=0
+    cantidad=0
+    for event in lt.iterator(values):
+        id_event=(event["user_id"],event["track_id"],event["created_at"])
+        couple2=mp.get(catalog["user-track-createdMap"],id_event)
+        eventTrack=me.getValue(couple2)["hashtag"]
+
+        couple2=mp.get(catalog["sentiment_values"],eventTrack)
+        vader=me.getValue(couple2)
+
+        if vader!="":
+            cantidad+=float(vader)
+            contador+=1
+    return contador,cantidad
+
+
+
+
+
 
 
 # =====================    
@@ -435,3 +480,6 @@ def printReqFour(genreResults,totalReproductions):
             event = slit.next(iterator)
             print("Artista "+str(counter)+": "+event['artist_id'])
             counter +=1
+def printReqFive(genres):
+    pass
+    #for genre in genres.keys():

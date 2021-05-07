@@ -42,7 +42,7 @@ def init():
 # Funciones para la carga de datos
 # =================================
 
-def loadData(catalog, contextfile,usertrack):
+def loadData(catalog, contextfile,usertrack,vaderFile):
     
     delta_time = -1.0
     delta_memory = -1.0
@@ -61,8 +61,13 @@ def loadData(catalog, contextfile,usertrack):
     input_file = csv.DictReader(open(context, encoding = 'utf-8'), delimiter=",") 
     for event in input_file:
         model.eventInUserTrackMap(catalog, event)
-
     
+    vaderFile=cf.data_dir + vaderFile
+    input_file=csv.DictReader(open(vaderFile,encoding="utf-8"),delimiter=",")
+    for vader in input_file:
+        model.addSentimentValues(catalog,vader)
+
+
     stop_memory = getMemory()
     stop_time = getTime()
     tracemalloc.stop()

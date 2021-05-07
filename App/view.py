@@ -72,7 +72,7 @@ while True:
 
     elif int(inputs[0]) == 2:
         print("\nCargando información de los archivos ....")
-        resources=controller.loadData(catalog, contextfile,usertrack)
+        resources=controller.loadData(catalog, contextfile,usertrack,sentiment)
         artists = controller.artistsSize(catalog)
         tracks = controller.tracksSize(catalog)
         events = controller.eventsSize(catalog)
