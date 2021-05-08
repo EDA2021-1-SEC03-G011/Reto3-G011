@@ -164,9 +164,11 @@ def createTempoInstruList(tempoMap,loTempo, hiTempo,loInstru,hiInstru):
 def filterByTime(timeMap,loHour,hiHour,catalog):
     return model.filterByTime(timeMap,loHour,hiHour,catalog)
 
-def findTopGenre(genresDict):
-    return model.findTopGenre(genresDict)
+def findTopGenre(genresDict,trackDict):
+    return model.findTopGenre(genresDict,trackDict)
 
+def findTenTracks(map,genre,tracks,catalog):
+    model.findTenTracks(map,genre,tracks,catalog)
 
 # ========================================
 # Funciones de consulta sobre el catálogo

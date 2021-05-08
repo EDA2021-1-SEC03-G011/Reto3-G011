@@ -281,8 +281,11 @@ def filterByFeatures(catalog,lovalueE,hivalueE,lovalueD,hivalueD):
 def filterByTime(timeMap, loHour, hiHour,catalog):
     listOfLists = om.values(timeMap, loHour, hiHour)
     genres ={}
+    track_dict = {}
+
     for genre in catalog['genres'].keys():
-        genres[genre] = mp.newMap(numelements=5000, maptype='PROBING',loadfactor=1.0)
+        genres[genre] = mp.newMap(numelements=5000, maptype='PROBING',loadfactor=0.5)
+        track_dict[genre] = mp.newMap(numelements=5000, maptype='PROBING',loadfactor=0.5)
 
     for list in lt.iterator(listOfLists):
         for event in lt.iterator(list):
@@ -290,61 +293,82 @@ def filterByTime(timeMap, loHour, hiHour,catalog):
             for genre in catalog['genres'].keys():
                 if catalog['genres'][genre][0] <= float(event['tempo']) <= catalog['genres'][genre][1]:
                     mp.put(genres[genre],id_event,event )
+                    mp.put(track_dict[genre],event['track_id'],event )
             
-    return genres
+    return genres, track_dict
 
 
-def findTopGenre(genresDict):
+def findTopGenre(genresDict,trackDict):
     top = []
     orderedDict = {}
     topGenre = ""
     
     for genreList in genresDict.values():
-        top.append(lt.size(genreList))
+        top.append(mp.size(genreList))
     top.sort(reverse = True)
 
     for rep in top:
         for genre in genresDict.keys():
-            if lt.size(genresDict[genre]) == rep:
+            if mp.size(genresDict[genre]) == rep:
                 orderedDict[genre] = rep
 
     for genre in genresDict.keys():
-        if lt.size(genresDict[genre]) == top[0]:
+        if mp.size(genresDict[genre]) == top[0]:
             topGenre = genre
 
-    return orderedDict, topGenre
+    return orderedDict, topGenre, mp.size(trackDict[topGenre])
 
 def findVaderAvg(catalog,track): #recibe como parametro el id de la canción y retorna la cantidad total de hashtags y su promedio de vader
-    couple=mp.get(catalog["tracks"],track)
-    value=me.getValue(couple)
-    print('mapa',mp.size(value))
-    values=mp.valueSet(value)
     counter_mean=0
     quantity=0
-    counter_hashtags =0
-    for event in lt.iterator(values):
+    hashtag_map = mp.newMap(numelements=15, maptype='PROBING')
+    total_hashtags = mp.newMap(numelements=15, maptype='PROBING')
+
+    couple=mp.get(catalog["tracks"],track)
+    eventsForTrack=me.getValue(couple)
+
+    events=mp.valueSet(eventsForTrack)
+    
+    for event in lt.iterator(events):
         id_event=(event["user_id"],event["track_id"],event["created_at"])
-        couple2=mp.get(catalog["user-track-createdMap"],id_event)
-        eventTrack=me.getValue(couple2)["hashtag"]
-        print(couple2, eventTrack)
-        couple2=mp.get(catalog["sentiment_values"],eventTrack)
-        if couple2 is not None:
+        coupleUserTrack=mp.get(catalog["user-track-createdMap"],id_event)
 
-            vader=me.getValue(couple2)
+        eventUserTrack=me.getValue(coupleUserTrack)
+        hashtag = eventUserTrack['hashtag']
 
-            if vader!="":
-                quantity+=float(vader)
-                counter_mean+=1
-        
-        counter_hashtags += 1
+        contains = mp.contains(catalog["sentiment_values"],hashtag)
+        mp.put(total_hashtags,hashtag,1)
+        if contains:
+            coupleSentiment = mp.get(catalog["sentiment_values"],hashtag)
+            vader=me.getValue(coupleSentiment)
+            if not mp.contains(hashtag_map,hashtag):
+                mp.put(hashtag_map,hashtag,1)
+                if vader!="":
+                    quantity+=float(vader)
+                    counter_mean+=1
+    if counter_mean == 0:
+        counter_mean = 1
     quantity /= counter_mean
 
-    return counter_hashtags, quantity
+    return mp.size(total_hashtags), quantity
 
+def findTenTracks(map,genre,tracks,catalog):
+    list = mp.valueSet(map)
+    counter = 1
 
-
-
-
+    top = 10
+    if top > lt.size(list):
+        top = lt.size(list)
+    randomList = random.sample(range(1, lt.size(list)), top)
+    print('========================== ',genre.upper(),' SENTIMENT ANALYSIS =========================')
+    print(genre.title(),' tiene ',tracks,' tracks unicos')
+    print("\nLos top 10 tracks seleccionados aleatoriamente son: \n")
+    for i in randomList:
+        event = lt.getElement(list, i)
+        answer = findVaderAvg(catalog,event['track_id'])
+        #TOP 1 track: 3d02f9fcad37e6bb227682761039498c with 5 hashtags and VADER = 0.6
+        print('TOP',counter, 'track: ',event['track_id'], 'with' ,answer[0], 'hashtags and VADER = ',answer[1])
+        counter +=1 
 
 
 # =====================    

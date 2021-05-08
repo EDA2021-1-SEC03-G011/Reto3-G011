@@ -157,14 +157,25 @@ while True:
         controller.printReqFour(genreResults,totalReproductions)
 
     elif int(inputs[0]) == 7:
+        counter = 1
+        sumation = 0
         loHour = input("Digite el valor minimo de la hora del dia con formato (HH:MM:SS): ")
         hiHour = input("Digite el valor maximo de la hora del dia con formato (HH:MM:SS): ")
         loHour = controller.timeInSeconds(loHour)
         hiHour = controller.timeInSeconds(hiHour)
         if controller.verifyRanges(loHour,hiHour):
             genresDict = controller.filterByTime(catalog['timeMap'],loHour,hiHour,catalog)
-            answer = controller.findTopGenre(genresDict)
-            answer2 = controller.findVaderAvg(catalog,'3d02f9fcad37e6bb227682761039498c')
+            print("\n+++++++ Resultados Req No. 5 +++++++")
+            print("====================== TOP REPRODUCCIONES GENEROS ======================")
+            stepOne = controller.findTopGenre(genresDict[0],genresDict[1])
+            for genre in stepOne[0].keys():
+                print('TOP ',counter,': ',genre,' con ',stepOne[0][genre],' reproducciones')
+                counter += 1
+                sumation += stepOne[0][genre]
+            print("Hay un total de: ",sumation," reproducciones entre ",loHour, " y ",hiHour)
+            print("El genero mas escuchado fue: ",stepOne[1],' con ',stepOne[0][stepOne[1]],' reproducciones')
+            stepTwo = controller.findTenTracks(genresDict[0][stepOne[1]],stepOne[1],stepOne[2],catalog)
+
         else: 
             print("Los rangos ingresados no son validos")
     else:
