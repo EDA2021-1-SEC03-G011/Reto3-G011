@@ -91,6 +91,25 @@ def createTempoList(tempoMap, loTempo, hiTempo):
     # FUNCION REQ 3, REQ 4
     return model.createTempoList(tempoMap, loTempo, hiTempo)
 
+def createTempoListArtists(tempoMap, loTempo, hiTempo):
+    # FUNCION REQ 3, REQ 4
+    delta_time = -1.0
+    delta_memory = -1.0
+
+    tracemalloc.start()
+
+    start_time = getTime()
+    start_memory = getMemory()
+    answer =  model.createTempoListArtists(tempoMap, loTempo, hiTempo)
+    stop_memory = getMemory()
+    stop_time = getTime()
+    tracemalloc.stop()
+
+    delta_time = stop_time - start_time
+    delta_memory = deltaMemory(start_memory, stop_memory)
+
+    return answer,delta_time,delta_memory
+
 def createSubList(list, rank):
     # FUNCION REQ 4
     return model.createSubList(list, rank)

@@ -144,27 +144,33 @@ while True:
         tempoMap = catalog['tempoMap']
         totalReproductions = 0
         genreResults = {}
+        tiempo =0
+        memoria = 0
         for genre in genreList:
             loTempo = catalog['genres'][genre][0]
             hiTempo = catalog['genres'][genre][1]
-            tempoList = controller.createTempoList(tempoMap, loTempo, hiTempo)
-            eventList = controller.createSubList(tempoList, 10)
-            artistsMap = controller.createArtistMap(tempoList)
-            reproductions = lt.size(tempoList)
+            tempoList = controller.createTempoListArtists(tempoMap, loTempo, hiTempo)
+            eventList = controller.createSubList(tempoList[0][0], 10)
+            reproductions = lt.size(tempoList[0][0])
             totalReproductions += reproductions
-            genreResults[genre]={'tempo':(loTempo,hiTempo),'reproductions':reproductions,'artists':artistsMap, 'list':eventList}
+            genreResults[genre]={'tempo':(loTempo,hiTempo),'reproductions':reproductions,'artists':tempoList[0][1], 'list':eventList}
+            tiempo += tempoList[1]
+            memoria += tempoList[2]
 
         controller.printReqFour(genreResults,totalReproductions)
+        print("Tiempo usado: ",tiempo," ms")
+        print("Memoria consumida: ",memoria," kb")
 
     elif int(inputs[0]) == 7:
+        #REQ 5
         counter = 1
         sumation = 0
         loHour = input("Digite el valor minimo de la hora del dia con formato (HH:MM:SS): ")
         hiHour = input("Digite el valor maximo de la hora del dia con formato (HH:MM:SS): ")
-        loHour = controller.timeInSeconds(loHour)
-        hiHour = controller.timeInSeconds(hiHour)
-        if controller.verifyRanges(loHour,hiHour):
-            genresDict = controller.filterByTime(catalog['timeMap'],loHour,hiHour,catalog)
+        loHourSec = controller.timeInSeconds(loHour)
+        hiHourSec = controller.timeInSeconds(hiHour)
+        if controller.verifyRanges(loHourSec,hiHourSec):
+            genresDict = controller.filterByTime(catalog['timeMap'],loHourSec,hiHourSec,catalog)
             print("\n+++++++ Resultados Req No. 5 +++++++")
             print("====================== TOP REPRODUCCIONES GENEROS ======================")
             stepOne = controller.findTopGenre(genresDict[0],genresDict[1])
@@ -172,12 +178,11 @@ while True:
                 print('TOP ',counter,': ',genre,' con ',stepOne[0][genre],' reproducciones')
                 counter += 1
                 sumation += stepOne[0][genre]
-            print("Hay un total de: ",sumation," reproducciones entre ",loHour, " y ",hiHour)
-            print("El genero mas escuchado fue: ",stepOne[1],' con ',stepOne[0][stepOne[1]],' reproducciones')
+            print("\nHay un total de: ",sumation," reproducciones entre ",loHour, " y ",hiHour)
+            print("El genero mas escuchado fue: ",stepOne[1],' con ',stepOne[0][stepOne[1]],' reproducciones\n')
             stepTwo = controller.findTenTracks(genresDict[0][stepOne[1]],stepOne[1],stepOne[2],catalog)
 
         else: 
             print("Los rangos ingresados no son validos")
-    else:
-        sys.exit(0)
+    
 sys.exit(0)

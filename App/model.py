@@ -54,7 +54,7 @@ def newCatalog():
 
     catalog['user-track-createdMap'] = mp.newMap(maptype='PROBING',numelements=80000) #se cambio a tabla de hash para acceder mas rapido a sus valores
 
-    catalog['eventMap'] = om.newMap(omaptype='BST')
+    catalog['eventMap'] = mp.newMap(maptype='PROBING',numelements=60000, loadfactor=0.5)
 
     catalog['tempoMap'] = om.newMap(omaptype='RBT')
 
@@ -110,7 +110,7 @@ def eventInUserTrackMap(catalog, event):
     #Creando los mapas mirando si el evento se repite en ambos archivos
 
     if mp.contains(catalog['user-track-createdMap'],id_event):
-        om.put(catalog['eventMap'],id_event,event)
+        mp.put(catalog['eventMap'],id_event,event)
 
         #creando mapa para los artistas
         if not mp.contains(catalog['tracks'],event['track_id']):
@@ -219,6 +219,29 @@ def createTempoList(tempoMap, loTempo, hiTempo):
     
     return mp.valueSet(answerMap)
 
+def createTempoListArtists(tempoMap, loTempo, hiTempo):
+    # FUNCION REQ 3, REQ 4
+    """
+    Recibe por parametro un RBT del tempo y los rangos, retorna una lista con 
+    los eventos/tracks que estan en ese rango
+    """
+    listOfLists = om.values(tempoMap, loTempo, hiTempo)
+    answerMap = mp.newMap(maptype='CHAINING',loadfactor=1.0,numelements=28000)
+    artists = mp.newMap(maptype='CHAINING',loadfactor=1.0,numelements=5000)
+
+    iteratorLists = slit.newIterator(listOfLists)
+    while slit.hasNext(iteratorLists):
+        list = slit.next(iteratorLists)
+
+        iteratorSongs = slit.newIterator(list)
+        while slit.hasNext(iteratorSongs):
+            song = slit.next(iteratorSongs)
+            id = song['user_id'],song['track_id'],song['created_at']
+            mp.put(answerMap, id, song)
+            mp.put(artists,song['artist_id'],song)
+    
+    return mp.valueSet(answerMap),mp.size(artists)
+
 
 def createTempoInstruList(tempoMap,loTempo, hiTempo,loInstru,hiInstru):
     #FUNCION UNICA REQ 3
@@ -250,7 +273,7 @@ def createSubList(list, rank):
 
 def filterByChar(catalog, characteristic, loValue,hiValue):
     # FUNCION UNICA REQ 1
-    list = om.valueSet(catalog['eventMap'])
+    list = mp.valueSet(catalog['eventMap'])
     answerMap = mp.newMap(maptype='PROBNG', numelements=1800)
     counter = 0
 
@@ -355,6 +378,7 @@ def findVaderAvg(catalog,track): #recibe como parametro el id de la canción y r
 def findTenTracks(map,genre,tracks,catalog):
     list = mp.valueSet(map)
     counter = 1
+    answerList = lt.newList(datastructure='SINGLE_LIKED')
 
     top = 10
     if top > lt.size(list):
@@ -365,9 +389,11 @@ def findTenTracks(map,genre,tracks,catalog):
     print("\nLos top 10 tracks seleccionados aleatoriamente son: \n")
     for i in randomList:
         event = lt.getElement(list, i)
-        answer = findVaderAvg(catalog,event['track_id'])
-        #TOP 1 track: 3d02f9fcad37e6bb227682761039498c with 5 hashtags and VADER = 0.6
-        print('TOP',counter, 'track: ',event['track_id'], 'with' ,answer[0], 'hashtags and VADER = ',answer[1])
+        lt.addLast(answerList,findVaderAvg(catalog,event['track_id']))
+    answerList = sa.sort(answerList,cmpfunction= compareHashtag)
+
+    for track in lt.iterator(answerList):
+        print('TOP',counter, 'track: ',event['track_id'], 'with' ,track[0], 'hashtags and VADER = ',round(track[1],2))
         counter +=1 
 
 
@@ -376,7 +402,7 @@ def findTenTracks(map,genre,tracks,catalog):
 # =====================
 
 def eventsSize(catalog):
-    return om.size(catalog['eventMap'])
+    return mp.size(catalog['eventMap'])
 
 def artistsSize(catalog):
     return mp.size(catalog['artists'])
@@ -390,7 +416,14 @@ def uniqueSongsChar(charList):
 def mapSize(map):
     return om.size(map)
 
+
+# ================================================================
 # Funciones utilizadas para comparar elementos dentro de una lista
+# ================================================================
+
+def compareHashtag(genre1,genre2):
+    return float(genre1[0])>float(genre2[0])
+
 
 # Funciones de ordenamiento
 
@@ -409,6 +442,7 @@ def askGenre(catalog):
         print("\nGenero\tBMP Tipico")
         for genre in genreDictionary.keys():
             print(str(genre)+"\t"+str(genreDictionary[genre]))
+        print("\nLa lista con los generos a buscar es: ",genreList)
         print("\nQue accion desea realizar:\n")
         print(">1< Agregar un nuevo genero al diccionario")
         print(">2< Agregar un genero a la lista de busqueda")
@@ -461,18 +495,17 @@ def timeInSeconds(hour):
 
 def printReqTwo(answer):
     #FUNCIÓN REQ2
-    size=lt.size(answer)
-    contador=10
-    if size<contador:
-        contador=size
-
-    print("Total de tracks unicos : ",size)
+    top = 5
+    if top > lt.size(answer):
+        top = lt.size(answer)
+    randomList = random.sample(range(1, lt.size(answer)), top)
+    counter = 1
+    print("Total de tracks unicos : ",lt.size(answer))
     
-    i=1
-    while i<10:
-        event=lt.getElement(answer,i)
-        print("Track",i,":  ",event["track_id"], " with energy of ", event["energy"] ," and danceability of ", event["danceability"] )
-        i+=1
+    for i in randomList:
+        event = lt.getElement(answer, i)
+        print("Track",counter,":  ",event["track_id"], " with energy of ", event["energy"] ," and danceability of ", event["danceability"] )
+        counter +=1
     
 
 def printReqThree(list,loInstru,hiInstru,loTempo,hiTempo):
