@@ -219,29 +219,6 @@ def createTempoList(tempoMap, loTempo, hiTempo):
     
     return mp.valueSet(answerMap)
 
-def createTempoListArtists(tempoMap, loTempo, hiTempo):
-    # FUNCION REQ 3, REQ 4
-    """
-    Recibe por parametro un RBT del tempo y los rangos, retorna una lista con 
-    los eventos/tracks que estan en ese rango
-    """
-    listOfLists = om.values(tempoMap, loTempo, hiTempo)
-    answerMap = mp.newMap(maptype='CHAINING',loadfactor=1.0,numelements=28000)
-    artists = mp.newMap(maptype='CHAINING',loadfactor=1.0,numelements=5000)
-
-    iteratorLists = slit.newIterator(listOfLists)
-    while slit.hasNext(iteratorLists):
-        list = slit.next(iteratorLists)
-
-        iteratorSongs = slit.newIterator(list)
-        while slit.hasNext(iteratorSongs):
-            song = slit.next(iteratorSongs)
-            id = song['user_id'],song['track_id'],song['created_at']
-            mp.put(answerMap, id, song)
-            mp.put(artists,song['artist_id'],song)
-    
-    return mp.valueSet(answerMap),mp.size(artists)
-
 
 def createTempoInstruList(tempoMap,loTempo, hiTempo,loInstru,hiInstru):
     #FUNCION UNICA REQ 3
@@ -389,11 +366,12 @@ def findTenTracks(map,genre,tracks,catalog):
     print("\nLos top 10 tracks seleccionados aleatoriamente son: \n")
     for i in randomList:
         event = lt.getElement(list, i)
-        lt.addLast(answerList,findVaderAvg(catalog,event['track_id']))
+        lt.addLast(answerList,(findVaderAvg(catalog,event['track_id']),
+                               event['track_id']))
     answerList = sa.sort(answerList,cmpfunction= compareHashtag)
 
     for track in lt.iterator(answerList):
-        print('TOP',counter, 'track: ',event['track_id'], 'with' ,track[0], 'hashtags and VADER = ',round(track[1],2))
+        print('TOP',counter, 'track: ',track[1], 'with' ,track[0][0], 'hashtags and VADER = ',round(track[0][1],2))
         counter +=1 
 
 
@@ -422,7 +400,7 @@ def mapSize(map):
 # ================================================================
 
 def compareHashtag(genre1,genre2):
-    return float(genre1[0])>float(genre2[0])
+    return float(genre1[0][0])>float(genre2[0][0])
 
 
 # Funciones de ordenamiento

@@ -149,13 +149,16 @@ while True:
         for genre in genreList:
             loTempo = catalog['genres'][genre][0]
             hiTempo = catalog['genres'][genre][1]
-            tempoList = controller.createTempoListArtists(tempoMap, loTempo, hiTempo)
-            eventList = controller.createSubList(tempoList[0][0], 10)
-            reproductions = lt.size(tempoList[0][0])
+            tempoList = controller.createTempoList(tempoMap, loTempo, hiTempo)
+            eventList = controller.createSubList(tempoList[0], 10)
+            artists = controller.createArtistMap(tempoList[0])
+            reproductions = lt.size(tempoList[0])
             totalReproductions += reproductions
-            genreResults[genre]={'tempo':(loTempo,hiTempo),'reproductions':reproductions,'artists':tempoList[0][1], 'list':eventList}
+            genreResults[genre]={'tempo':(loTempo,hiTempo),'reproductions':reproductions,'artists':artists[0], 'list':eventList}
             tiempo += tempoList[1]
+            tiempo += artists[1]
             memoria += tempoList[2]
+            memoria += artists[2]
 
         controller.printReqFour(genreResults,totalReproductions)
         print("Tiempo usado: ",tiempo," ms")
@@ -170,6 +173,7 @@ while True:
         loHourSec = controller.timeInSeconds(loHour)
         hiHourSec = controller.timeInSeconds(hiHour)
         if controller.verifyRanges(loHourSec,hiHourSec):
+            timeMemory = controller.memoryTime(True,0,0)
             genresDict = controller.filterByTime(catalog['timeMap'],loHourSec,hiHourSec,catalog)
             print("\n+++++++ Resultados Req No. 5 +++++++")
             print("====================== TOP REPRODUCCIONES GENEROS ======================")
@@ -181,8 +185,12 @@ while True:
             print("\nHay un total de: ",sumation," reproducciones entre ",loHour, " y ",hiHour)
             print("El genero mas escuchado fue: ",stepOne[1],' con ',stepOne[0][stepOne[1]],' reproducciones\n')
             stepTwo = controller.findTenTracks(genresDict[0][stepOne[1]],stepOne[1],stepOne[2],catalog)
-
+            timeMemory = controller.memoryTime(False,timeMemory[0],timeMemory[1])
+            print("Tiempo usado: ",timeMemory[0]," ms")
+            print("Memoria consumida: ",timeMemory[1]," kb")
         else: 
             print("Los rangos ingresados no son validos")
+        
+        
     
 sys.exit(0)

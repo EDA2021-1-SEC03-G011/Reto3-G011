@@ -85,13 +85,26 @@ def loadData(catalog, contextfile,usertrack,vaderFile):
 
 def createArtistMap(charList):
     # FUNCION REQ 4
-    return model.createArtistMap(charList)
+    delta_time = -1.0
+    delta_memory = -1.0
+
+    tracemalloc.start()
+
+    start_time = getTime()
+    start_memory = getMemory()
+
+    answer = model.createArtistMap(charList)
+
+    stop_memory = getMemory()
+    stop_time = getTime()
+    tracemalloc.stop()
+
+    delta_time = stop_time - start_time
+    delta_memory = deltaMemory(start_memory, stop_memory)
+
+    return answer, delta_time,delta_memory
 
 def createTempoList(tempoMap, loTempo, hiTempo):
-    # FUNCION REQ 3, REQ 4
-    return model.createTempoList(tempoMap, loTempo, hiTempo)
-
-def createTempoListArtists(tempoMap, loTempo, hiTempo):
     # FUNCION REQ 3, REQ 4
     delta_time = -1.0
     delta_memory = -1.0
@@ -100,7 +113,9 @@ def createTempoListArtists(tempoMap, loTempo, hiTempo):
 
     start_time = getTime()
     start_memory = getMemory()
-    answer =  model.createTempoListArtists(tempoMap, loTempo, hiTempo)
+
+    answer =  model.createTempoList(tempoMap, loTempo, hiTempo)
+
     stop_memory = getMemory()
     stop_time = getTime()
     tracemalloc.stop()
@@ -108,7 +123,7 @@ def createTempoListArtists(tempoMap, loTempo, hiTempo):
     delta_time = stop_time - start_time
     delta_memory = deltaMemory(start_memory, stop_memory)
 
-    return answer,delta_time,delta_memory
+    return answer, delta_time,delta_memory
 
 def createSubList(list, rank):
     # FUNCION REQ 4
@@ -276,3 +291,24 @@ def deltaMemory(start_memory, stop_memory):
     # de Byte -> kByte
     delta_memory = delta_memory/1024.0
     return delta_memory
+
+def memoryTime(start,start_time, start_memory):
+    if start == True:
+        delta_time = -1.0
+        delta_memory = -1.0
+
+        tracemalloc.start()
+
+        start_time = getTime()
+        start_memory = getMemory()
+        return start_time,  start_memory
+    else: 
+        stop_memory = getMemory()
+        stop_time = getTime()
+        tracemalloc.stop()
+
+        delta_time = stop_time - start_time
+        delta_memory = deltaMemory(start_memory, stop_memory)
+
+        return delta_time,delta_memory
+
