@@ -238,6 +238,9 @@ def verifyRanges(loRange,hiRange):
     # FUNCION REQ1, REQ 3, REQ 4
     return model.verifyRanges(loRange,hiRange)
 
+def verifyTime(loHour,hiHour):
+    return model.verifyTime(loHour,hiHour)
+
 def timeInSeconds(hour):
     return model.timeInSeconds(hour)
 

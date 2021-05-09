@@ -460,6 +460,25 @@ def verifyRanges(loRange,hiRange):
     if (loRange <= hiRange) and loRange>=0 and hiRange>=0:
         correct = True
     return correct
+def verifyTime(loHour,hiHour):
+    correct = False
+    loTime = loHour.split(':')
+    loHours = int(loTime[0])
+    loMinutes = int(loTime[1])
+    loSeconds = int(loTime[2])
+    if loHours > 24 or loMinutes > 60 or loSeconds > 60:
+        correct = False
+
+    hiTime = hiHour.split(':')
+    hiHours = int(hiTime[0])
+    hiMinutes = int(hiTime[1])
+    hiSeconds = int(hiTime[2])
+    if hiHours > 24 or hiMinutes > 60 or hiSeconds > 60:
+        correct = False
+    
+    return correct
+    
+
 
 def timeInSeconds(hour):
     time = hour.split(":")
