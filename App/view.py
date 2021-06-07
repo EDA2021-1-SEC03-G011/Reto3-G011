@@ -133,8 +133,7 @@ while True:
             tempoMap = catalog['tempoMap']
             instruList = controller.createTempoInstruList(tempoMap,loTempo, hiTempo,loInstru,hiInstru)
             controller.printReqThree(instruList[0],loInstru,hiInstru,loTempo,hiTempo)
-            print("Tiempo usado: ",answer[1]," ms")
-            print("Memoria consumida: ",answer[2]," kb")
+            
         else:
             print("Los rangos ingresados no son validos")
 
@@ -172,7 +171,7 @@ while True:
         hiHour = input("Digite el valor maximo de la hora del dia con formato (HH:MM:SS): ")
         loHourSec = controller.timeInSeconds(loHour)
         hiHourSec = controller.timeInSeconds(hiHour)
-        if controller.verifyRanges(loHourSec,hiHourSec) and controller.verifyTime(loHour,hiHour):
+        if True:
             timeMemory = controller.memoryTime(True,0,0)
             genresDict = controller.filterByTime(catalog['timeMap'],loHourSec,hiHourSec,catalog)
             print("\n+++++++ Resultados Req No. 5 +++++++")
